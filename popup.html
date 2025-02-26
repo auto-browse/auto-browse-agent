@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Puppeteer Extension</title>
+    <style>
+        body {
+            width: 300px;
+            padding: 10px;
+        }
+
+        input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        #result {
+            margin-top: 10px;
+            word-wrap: break-word;
+        }
+
+        button {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="text" id="urlInput" placeholder="Enter URL">
+    <button id="testButton">Get Current Page Title</button>
+    <button id="highlightButton">Highlight All Links</button>
+    <div id="result"></div>
+    <script src="popup.js"></script>
+</body>
+
+</html>
