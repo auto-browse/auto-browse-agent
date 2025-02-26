@@ -1,10 +1,11 @@
 {
-    "name": "puppeteer-in-extension",
-    "version": "1.0.0",
+    "name": "auto-browse-agent-extension",
+    "version": "0.0.1",
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build": "rollup -c && cp manifest.json out/"
+        "clean": "rm -rf dist",
+        "build": "rollup -c && cp manifest.json dist/"
     },
     "keywords": [],
     "author": "",
@@ -12,5 +13,8 @@
     "devDependencies": {
         "@rollup/plugin-node-resolve": "^15.2.3",
         "rollup": "^4.22.4"
+    },
+    "dependencies": {
+        "puppeteer-core": "^24.3.0"
     }
 }
