@@ -5,7 +5,7 @@ import { MessageRequest, MessageResponse } from "../messaging/types";
 chrome.runtime.onMessage.addListener(
     (
         request: MessageRequest,
-        sender: chrome.runtime.MessageSender,
+        _sender: chrome.runtime.MessageSender,
         sendResponse: (response: MessageResponse) => void
     ) => {
         // Handle the message asynchronously

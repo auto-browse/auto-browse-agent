@@ -11,7 +11,7 @@ export class OpenAIService extends BaseLLMService {
      * @param {LLMRequest} request - The request to process
      * @returns {Promise<LLMResponse>} The OpenAI response
      */
-    async process(request: LLMRequest): Promise<LLMResponse> {
+    async process(_request: LLMRequest): Promise<LLMResponse> {
         if (!this.validateConfig())
         {
             return this.createErrorResponse("Invalid OpenAI configuration");
