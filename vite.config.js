@@ -167,10 +167,9 @@ export default defineConfig({
 			"@messaging": resolve(__dirname, "src/messaging"),
 			"@storage": resolve(__dirname, "src/storage"),
 			"@llm": resolve(__dirname, "src/llm"),
-			"@common": resolve(__dirname, "src/common"),
 			"puppeteer-core": resolve(__dirname, "node_modules/puppeteer-core"),
 			"chromium-bidi": resolve(__dirname, "node_modules/chromium-bidi"),
-			crypto: resolve(__dirname, "src/utils/crypto-polyfill.ts")
+			crypto: resolve(__dirname, "src/browser/utils/crypto-polyfill.ts")
 		}
 	}
 });
