@@ -1,16 +1,18 @@
 {
-    "name": "Auto Browse Agent",
-    "version": "0.0.1",
     "manifest_version": 3,
-    "background": {
-        "service_worker": "background.js",
-        "type": "module"
-    },
+    "name": "Auto Browse Agent",
+    "description": "Auto-Browse Agent for automated browsing",
+    "version": "0.0.2",
+    "author": "Gurvinder Dhillon",
+    "permissions": [
+        "activeTab",
+        "debugger"
+    ],
     "action": {
         "default_popup": "popup.html"
     },
-    "permissions": [
-        "debugger",
-        "background"
-    ]
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    }
 }

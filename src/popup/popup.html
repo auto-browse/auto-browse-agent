@@ -2,6 +2,8 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto Browse Agent</title>
     <style>
         body {
@@ -9,29 +11,32 @@
             padding: 10px;
         }
 
-        input {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        #result {
-            margin-top: 10px;
-            word-wrap: break-word;
-        }
-
         button {
+            margin: 5px;
+            padding: 5px;
             width: 100%;
-            margin-bottom: 10px;
+        }
+
+        #status {
+            margin-top: 10px;
+            padding: 5px;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
         }
     </style>
 </head>
 
 <body>
-    <input type="text" id="urlInput" placeholder="Enter URL">
-    <button id="testButton">Get Current Page Title</button>
-    <button id="highlightButton">Highlight All Links</button>
-    <div id="result"></div>
-    <script src="popup.js" type="module"></script>
+    <button id="test-connection">Test Connection</button>
+    <button id="highlight-links">Highlight Links</button>
+    <div id="status"></div>
+    <script type="module" src="popup.js"></script>
 </body>
 
 </html>

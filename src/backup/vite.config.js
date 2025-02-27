@@ -9,8 +9,8 @@ export default defineConfig({
 		assetsDir: "", // Output assets in root instead of assets/
 		rollupOptions: {
 			input: {
-				background: resolve(__dirname, "src/background/background.ts"),
-				popup: resolve(__dirname, "src/popup/popup.ts")
+				background: resolve(__dirname, "src/background/background.js"),
+				popup: resolve(__dirname, "src/popup/popup.js")
 			},
 			output: {
 				entryFileNames: "[name].js",
@@ -34,18 +34,18 @@ export default defineConfig({
 
 					// Keep background files completely separate
 					if (
-						id.includes("background.ts") ||
-						id.includes("messageHandler.ts") ||
-						id.includes("actionTypes.ts")
+						id.includes("background.js") ||
+						id.includes("messageHandler.js") ||
+						id.includes("actionTypes.js")
 					) {
 						return null;
 					}
 
 					// Bundle browserService with UI dependencies
 					if (
-						id.includes("browserService.ts") ||
-						id.includes("highlightService.ts") ||
-						id.includes("browserUtils.ts")
+						id.includes("browserService.js") ||
+						id.includes("highlightService.js") ||
+						id.includes("browserUtils.js")
 					) {
 						return "ui";
 					}
@@ -113,7 +113,7 @@ export default defineConfig({
 		alias: {
 			"puppeteer-core": resolve(__dirname, "node_modules/puppeteer-core"),
 			"chromium-bidi": resolve(__dirname, "node_modules/chromium-bidi"),
-			crypto: resolve(__dirname, "src/utils/crypto-polyfill.ts")
+			crypto: resolve(__dirname, "src/utils/crypto-polyfill.js")
 		}
 	}
 });
