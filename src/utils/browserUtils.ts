@@ -1,4 +1,4 @@
-import { ChromeTab, ServiceResponse } from "../types";
+import { ChromeTab, BrowserServiceResponse } from "../browser/types";
 
 /**
  * Get the current active tab in the current window
@@ -16,9 +16,9 @@ export const getActiveTab = async (): Promise<ChromeTab> => {
 /**
  * Handle errors in async operations
  * @param {Error} error - The error to handle
- * @returns {ServiceResponse} Error response
+ * @returns {BrowserServiceResponse} Error response
  */
-export const handleError = (error: Error): ServiceResponse => {
+export const handleError = (error: Error): BrowserServiceResponse => {
     console.error("Operation failed:", error);
     return {
         success: false,

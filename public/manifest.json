@@ -1,18 +1,30 @@
 {
     "manifest_version": 3,
-    "name": "Auto Browse Agent",
-    "description": "Auto-Browse Agent for automated browsing",
-    "version": "0.0.2",
-    "author": "Gurvinder Dhillon",
+    "name": "Auto Browse Extension",
+    "description": "A browser extension for automated browsing with LLM integration",
+    "version": "1.0.0",
     "permissions": [
         "activeTab",
+        "scripting",
+        "storage",
+        "sidePanel",
         "debugger"
+    ],
+    "host_permissions": [
+        "<all_urls>"
     ],
     "action": {
         "default_popup": "popup.html"
     },
+    "side_panel": {
+        "default_path": "sidepanel.html"
+    },
+    "options_page": "options.html",
     "background": {
         "service_worker": "background.js",
         "type": "module"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
     }
 }

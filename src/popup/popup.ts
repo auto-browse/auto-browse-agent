@@ -1,37 +1,92 @@
-import { ActionType, MessageRequest, MessageResponse } from "../types";
+import { handleMessage } from "../messaging/handlers/messageHandler";
+import { ActionType, MessageRequest } from "../messaging/types";
 
 document.addEventListener("DOMContentLoaded", () => {
-    const testConnectionBtn = document.getElementById("test-connection") as HTMLButtonElement;
-    const highlightLinksBtn = document.getElementById("highlight-links") as HTMLButtonElement;
-    const statusDiv = document.getElementById("status") as HTMLDivElement;
+    const root = document.getElementById("popup-root");
+    if (!root) return;
 
-    // Send message to background script and handle response
-    async function sendMessage(request: MessageRequest): Promise<void> {
+    // Create and append buttons
+    const getTitleBtn = document.createElement("button");
+    getTitleBtn.textContent = "Get Page Title";
+    getTitleBtn.onclick = async () => {
         try
         {
-            const response = await chrome.runtime.sendMessage(request) as MessageResponse;
-            updateStatus(response.message, response.success);
+            const request: MessageRequest = {
+                action: ActionType.GET_PAGE_TITLE
+            };
+            const response = await handleMessage(request);
+            updateStatus(response.message);
         } catch (error)
         {
-            updateStatus(
-                error instanceof Error ? error.message : String(error),
-                false
-            );
+            console.error("Error getting page title:", error);
+            updateStatus("Error: " + (error instanceof Error ? error.message : String(error)));
         }
-    }
+    };
 
-    // Update status display
-    function updateStatus(message: string, success: boolean): void {
-        statusDiv.textContent = message;
-        statusDiv.className = success ? "success" : "error";
-    }
+    const highlightBtn = document.createElement("button");
+    highlightBtn.textContent = "Highlight Links";
+    highlightBtn.onclick = async () => {
+        try
+        {
+            const request: MessageRequest = {
+                action: ActionType.HIGHLIGHT_LINKS
+            };
+            const response = await handleMessage(request);
+            updateStatus(response.message);
+        } catch (error)
+        {
+            console.error("Error highlighting links:", error);
+            updateStatus("Error: " + (error instanceof Error ? error.message : String(error)));
+        }
+    };
 
-    // Event listeners
-    testConnectionBtn.addEventListener("click", () => {
-        sendMessage({ action: ActionType.TEST_CONNECTION });
+    // Create status display
+    const status = document.createElement("div");
+    status.id = "status";
+    status.style.marginTop = "16px";
+    status.style.padding = "8px";
+    status.style.border = "1px solid #ccc";
+    status.style.borderRadius = "4px";
+
+    // Add styles to buttons
+    [getTitleBtn, highlightBtn].forEach(btn => {
+        btn.style.margin = "4px";
+        btn.style.padding = "8px 16px";
+        btn.style.borderRadius = "4px";
+        btn.style.border = "1px solid #ccc";
+        btn.style.cursor = "pointer";
+        btn.style.backgroundColor = "#f8f9fa";
     });
 
-    highlightLinksBtn.addEventListener("click", () => {
-        sendMessage({ action: ActionType.HIGHLIGHT_LINKS });
-    });
+    // Add elements to root
+    root.appendChild(getTitleBtn);
+    root.appendChild(document.createElement("br"));
+    root.appendChild(highlightBtn);
+    root.appendChild(status);
+
+    // Test connection on load
+    testConnection();
 });
+
+function updateStatus(message: string) {
+    const status = document.getElementById("status");
+    if (status)
+    {
+        status.textContent = message;
+    }
+}
+
+async function testConnection() {
+    try
+    {
+        const request: MessageRequest = {
+            action: ActionType.TEST_CONNECTION
+        };
+        const response = await handleMessage(request);
+        updateStatus(response.message);
+    } catch (error)
+    {
+        console.error("Error testing connection:", error);
+        updateStatus("Error: " + (error instanceof Error ? error.message : String(error)));
+    }
+}

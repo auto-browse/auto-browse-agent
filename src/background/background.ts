@@ -1,23 +1,31 @@
-import { MessageRequest, MessageResponse } from "../types";
-import { handleMessage } from "../actions/messageHandler";
+import { handleMessage } from "../messaging/handlers/messageHandler";
+import { MessageRequest, MessageResponse } from "../messaging/types";
 
-// Listen for messages from popup
+// Listen for messages from extension components
 chrome.runtime.onMessage.addListener(
-    (request: MessageRequest, sender, sendResponse) => {
-        // Handle async response
+    (
+        request: MessageRequest,
+        sender: chrome.runtime.MessageSender,
+        sendResponse: (response: MessageResponse) => void
+    ) => {
+        // Handle the message asynchronously
         handleMessage(request)
-            .then((response: MessageResponse) => {
-                sendResponse(response);
-            })
-            .catch((error: Error) => {
+            .then(sendResponse)
+            .catch((error) => {
+                console.error("Background script error:", error);
                 sendResponse({
                     success: false,
-                    message: error.message,
-                    error
+                    message: error instanceof Error ? error.message : String(error),
+                    error: error instanceof Error ? error : new Error(String(error))
                 });
             });
 
-        // Return true to indicate we will respond asynchronously
+        // Return true to indicate we will send response asynchronously
         return true;
     }
 );
+
+// Log when the extension is installed or updated
+chrome.runtime.onInstalled.addListener((details) => {
+    console.log("Extension installed/updated:", details.reason);
+});
