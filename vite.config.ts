@@ -1,10 +1,11 @@
 import { defineConfig } from "vite";
+import tailwindcss from '@tailwindcss/vite';
 import { resolve } from "path";
 import react from '@vitejs/plugin-react';
 import fs from "fs";
 
 export default defineConfig({
-    plugins: [react(), {
+    plugins: [tailwindcss(), react(), {
         name: "copy-extension-files",
         writeBundle(options, bundle) {
             // Find all chunks to include
