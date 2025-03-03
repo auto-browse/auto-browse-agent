@@ -6,7 +6,7 @@ import {
 } from "puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js";
 import { getActiveTab, handleError } from "../utils";
 import { domTraversalScript } from "../utils/domTraversal";
-import { BrowserConnection, BrowserServiceResponse } from "../types";
+import { BrowserConnection, BrowserServiceResponse, NavigationOptions, ClickOptions, FillOptions } from "../types";
 
 /**
  * Service class for managing browser operations using Puppeteer
@@ -457,6 +457,108 @@ class BrowserService {
                     timestamp: new Date().toISOString(),
                     elements
                 }
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+
+    /**
+     * Navigate to a URL in the current page
+     * @param {string} url - The URL to navigate to
+     * @param {NavigationOptions} options - Navigation options
+     * @returns {Promise<BrowserServiceResponse>} Response with navigation result
+     */
+    async goto(url: string, options?: NavigationOptions): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+
+            await page.goto(url, {
+                waitUntil: options?.waitUntil || 'networkidle0',
+                timeout: options?.timeout || 30000,
+                referer: options?.referer
+            });
+
+            const title = await page.title();
+            await browser.disconnect();
+
+            return {
+                success: true,
+                message: `Successfully navigated to ${url} (Page title: ${title})`
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+
+    /**
+     * Fill a form field or input element with text
+     * @param {string} selector - CSS selector for the element
+     * @param {string} value - Text to type into the element
+     * @param {FillOptions} options - Options for filling the input
+     * @returns {Promise<BrowserServiceResponse>} Response indicating success/failure
+     */
+    async fill(selector: string, value: string, options?: FillOptions): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+
+            // Wait for element to be ready
+            await page.waitForSelector(selector);
+
+            // Clear existing value first
+            await page.evaluate((sel) => {
+                const element = document.querySelector(sel);
+                if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)
+                {
+                    element.value = '';
+                }
+            }, selector);
+
+            // Type the new value
+            await page.type(selector, value, {
+                delay: options?.delay || 50 // Default to 50ms between keystrokes
+            });
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: `Successfully filled ${selector} with text`
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+
+    /**
+     * Click an element on the page
+     * @param {string} selector - CSS selector for the element to click
+     * @param {ClickOptions} options - Click options
+     * @returns {Promise<BrowserServiceResponse>} Response indicating success/failure
+     */
+    async click(selector: string, options?: ClickOptions): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+
+            // Wait for element to be ready
+            await page.waitForSelector(selector);
+
+            // Perform the click with specified options
+            await page.click(selector, {
+                button: options?.button || 'left',
+                clickCount: options?.clickCount || 1,
+                delay: options?.delay
+            });
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: `Successfully clicked element ${selector}`
             };
         } catch (error)
         {

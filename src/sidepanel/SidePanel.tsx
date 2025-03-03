@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect, FormEvent } from "react";
 import {
     Settings, Send, FileText, Link as LinkIcon, Code, Info,
-    Camera, Accessibility, GitFork, Cookie, Ghost, Target, Compass
+    Camera, Accessibility, GitFork, Cookie, Ghost, Target, Compass,
+    Loader2
 } from "lucide-react";
 import { useMessageHandler } from "./hooks/useMessageHandler";
+import { useChatSupervisor } from "./hooks/useChatSupervisor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -51,29 +53,73 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    const handleSendMessage = async () => {
-        if (!inputMessage.trim()) return;
+    const { isInitializing, error, processMessage, isReady } = useChatSupervisor();
 
-        const newMessage: ChatMessage = {
+    // Show initialization status in messages
+    useEffect(() => {
+        if (isInitializing) {
+            setMessages([{
+                id: "init",
+                content: "Initializing AI agents...",
+                sender: "assistant",
+                timestamp: new Date(),
+            }]);
+        } else if (error) {
+            setMessages([{
+                id: "error",
+                content: `Error initializing: ${error}`,
+                sender: "assistant",
+                timestamp: new Date(),
+            }]);
+        } else if (isReady) {
+            setMessages([{
+                id: "ready",
+                content: "Hello! I'm ready to help you browse and interact with web pages. What would you like to do?",
+                sender: "assistant",
+                timestamp: new Date(),
+            }]);
+        }
+    }, [isInitializing, error, isReady]);
+
+    const handleSendMessage = async () => {
+        if (!inputMessage.trim() || isInitializing) return;
+
+        const userMessage: ChatMessage = {
             id: Date.now().toString(),
             content: inputMessage,
             sender: "user",
             timestamp: new Date(),
         };
 
-        setMessages((prev) => [...prev, newMessage]);
+        setMessages((prev) => [...prev, userMessage]);
         setInputMessage("");
 
-        // Simulate assistant response
-        const assistantResponse: ChatMessage = {
-            id: (Date.now() + 1).toString(),
-            content: isDebugMode
-                ? "Debug mode is active. Please use the debug commands for assistance."
-                : "I understand your request. How else can I help you?",
-            sender: "assistant",
-            timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantResponse]);
+        try {
+            if (isDebugMode) {
+                const debugResponse: ChatMessage = {
+                    id: (Date.now() + 1).toString(),
+                    content: "Debug mode is active. Please use the debug commands for assistance.",
+                    sender: "assistant",
+                    timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, debugResponse]);
+            } else {
+                const assistantResponse = await processMessage(userMessage);
+                setMessages((prev) => [...prev, assistantResponse]);
+            }
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            toast.error(`Error: ${errorMessage}`);
+
+            // Add error message to chat
+            const errorResponse: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                content: `Error: ${errorMessage}`,
+                sender: "assistant",
+                timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, errorResponse]);
+        }
     };
 
     const handleDebugCommand = async (action: ActionType) => {
@@ -320,14 +366,32 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                     }}
                     className="flex gap-2"
                 >
-                    <Input
-                        value={inputMessage}
-                        onChange={(e) => setInputMessage(e.target.value)}
-                        placeholder={isDebugMode ? "Type a debug command..." : "Type a message..."}
-                        className="flex-1 rounded-full border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
-                    />
-                    <Button type="submit" size="icon" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white">
-                        <Send className="h-4 w-4" />
+                    <div className="flex-1 relative">
+                        <Input
+                            value={inputMessage}
+                            onChange={(e) => setInputMessage(e.target.value)}
+                            placeholder={isDebugMode ? "Type a debug command..." : "Type a message..."}
+                            className="w-full rounded-full border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
+                            disabled={isInitializing || !isReady}
+                            title={isInitializing ? "Initializing AI agents..." : !isReady ? "AI agents not ready" : ""}
+                        />
+                        {(isInitializing || !isReady) && (
+                            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-xs">
+                                {isInitializing ? "Initializing agents..." : "Error connecting to agents"}
+                            </div>
+                        )}
+                    </div>
+                    <Button
+                        type="submit"
+                        size="icon"
+                        className="rounded-full bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled={isInitializing || !isReady}
+                    >
+                        {isInitializing ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Send className="h-4 w-4" />
+                        )}
                     </Button>
                 </form>
             </div>

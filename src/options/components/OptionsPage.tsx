@@ -4,16 +4,24 @@ import { storageService } from "@/storage/services/storageService";
 import { ApiKey, Settings } from "@/storage/types/settings";
 import { toast } from "sonner";
 
+
+const providerDisplayNames: Record<string, string> = {
+    "openai": "OpenAI",
+    "anthropic": "Anthropic",
+    "google-ai": "Google AI",
+    "cohere": "Cohere"
+};
+
 const initialApiKeys: ApiKey[] = [
-    { provider: "OpenAI", key: "" },
-    { provider: "Anthropic", key: "" },
-    { provider: "Google AI", key: "" },
-    { provider: "Cohere", key: "" }
+    { provider: "openai", key: "" },
+    { provider: "anthropic", key: "" },
+    { provider: "google-ai", key: "" },
+    { provider: "cohere", key: "" }
 ];
 
 export const OptionsPage: React.FC = () => {
     const [apiKeys, setApiKeys] = useState<ApiKey[]>(initialApiKeys);
-    const [selectedProvider, setSelectedProvider] = useState("OpenAI");
+    const [selectedProvider, setSelectedProvider] = useState("openai");
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -81,7 +89,9 @@ export const OptionsPage: React.FC = () => {
                             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             {apiKeys.map(item => (
-                                <option key={item.provider} value={item.provider}>{item.provider}</option>
+                                <option key={item.provider} value={item.provider}>
+                                    {providerDisplayNames[item.provider]}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -96,7 +106,7 @@ export const OptionsPage: React.FC = () => {
                             <div key={item.provider} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <div className="flex justify-between items-center mb-2">
                                     <label htmlFor={`api-key-${item.provider}`} className="block text-sm font-medium text-gray-700">
-                                        {item.provider} API Key:
+                                        {providerDisplayNames[item.provider]} API Key:
                                     </label>
                                     {item.provider === selectedProvider && (
                                         <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
@@ -110,7 +120,7 @@ export const OptionsPage: React.FC = () => {
                                         type="password"
                                         value={item.key}
                                         onChange={(e) => handleApiKeyChange(item.provider, e.target.value)}
-                                        placeholder={`Enter your ${item.provider} API key`}
+                                        placeholder={`Enter your ${providerDisplayNames[item.provider]} API key`}
                                         className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                     <button

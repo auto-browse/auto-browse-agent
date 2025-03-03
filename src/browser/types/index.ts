@@ -1,4 +1,18 @@
-import type { Browser as PuppeteerBrowser, Page as PuppeteerPage } from "puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js";
+import type { Browser as PuppeteerBrowser, Page as PuppeteerPage, WaitForOptions } from "puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js";
+
+export interface NavigationOptions extends WaitForOptions {
+    referer?: string;
+}
+
+export interface ClickOptions {
+    button?: 'left' | 'right' | 'middle';
+    clickCount?: number;
+    delay?: number;
+}
+
+export interface FillOptions {
+    delay?: number; // Delay between keystrokes
+}
 
 export interface BrowserConnection {
     browser: PuppeteerBrowser;
