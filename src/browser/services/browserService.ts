@@ -5,6 +5,7 @@ import {
     Page
 } from "puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js";
 import { getActiveTab, handleError } from "../utils";
+import { domTraversalScript } from "../utils/domTraversal";
 import { BrowserConnection, BrowserServiceResponse } from "../types";
 
 /**
@@ -157,7 +158,7 @@ class BrowserService {
 
             // Get Puppeteer's accessibility snapshot
             const snapshot = await page.accessibility.snapshot({
-                interestingOnly: false // Get all nodes, not just interesting ones
+                interestingOnly: true // Do not Get all nodes, just interesting ones
             });
 
             await browser.disconnect();
@@ -232,6 +233,230 @@ class BrowserService {
                     `- Buttons: ${analysis.buttons}\n` +
                     `- Input fields: ${analysis.inputs}\n` +
                     `- Headings: H1 (${analysis.headings.h1}), H2 (${analysis.headings.h2}), H3 (${analysis.headings.h3})`
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+    /**
+     * Get DOM tree with visibility and interactivity info
+     * @returns {Promise<BrowserServiceResponse>} Response with DOM tree data
+     */
+    async getDomTree(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+            const tree = await page.evaluate(domTraversalScript);
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: "DOM Tree Snapshot",
+                data: {
+                    timestamp: new Date().toISOString(),
+                    tree
+                }
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+
+    /**
+     * Analyze cookie banners and consent UI
+     * @returns {Promise<BrowserServiceResponse>} Response with cookie banner analysis
+     */
+    async analyzeCookieBanners(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+            const tree = await page.evaluate(domTraversalScript);
+
+            // Filter tree to find cookie/consent related elements
+            function findCookieBanners(node: any): any[] {
+                const results: any[] = [];
+
+                const isCookieRelated =
+                    node.attributes?.id?.toLowerCase().includes('cookie') ||
+                    node.attributes?.id?.toLowerCase().includes('consent') ||
+                    node.attributes?.class?.toLowerCase().includes('cookie') ||
+                    node.attributes?.class?.toLowerCase().includes('consent') ||
+                    node.attributes?.['aria-label']?.toLowerCase().includes('cookie');
+
+                if (isCookieRelated && node.isInteractive)
+                {
+                    results.push(node);
+                }
+
+                if (node.children)
+                {
+                    for (const child of node.children)
+                    {
+                        results.push(...findCookieBanners(child));
+                    }
+                }
+
+                return results;
+            }
+
+            const cookieBanners = findCookieBanners(tree);
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: `Found ${cookieBanners.length} cookie-related interactive elements`,
+                data: {
+                    timestamp: new Date().toISOString(),
+                    elements: cookieBanners
+                }
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+
+    /**
+     * Explore shadow DOM content
+     * @returns {Promise<BrowserServiceResponse>} Response with shadow DOM data
+     */
+    async exploreShadowDom(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+            const tree = await page.evaluate(domTraversalScript);
+
+            // Filter tree to find shadow roots
+            function findShadowRoots(node: any): any[] {
+                const results: any[] = [];
+
+                if (node.shadowRoot)
+                {
+                    results.push(node);
+                }
+
+                if (node.children)
+                {
+                    for (const child of node.children)
+                    {
+                        results.push(...findShadowRoots(child));
+                    }
+                }
+
+                return results;
+            }
+
+            const shadowHosts = findShadowRoots(tree);
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: `Found ${shadowHosts.length} shadow DOM roots`,
+                data: {
+                    timestamp: new Date().toISOString(),
+                    shadowHosts
+                }
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+
+    /**
+     * Get map of all interactive elements
+     * @returns {Promise<BrowserServiceResponse>} Response with interactive elements map
+     */
+    async getInteractiveMap(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+            const tree = await page.evaluate(domTraversalScript);
+
+            // Filter tree to find interactive elements with positions
+            function findInteractiveElements(node: any): any[] {
+                const results: any[] = [];
+
+                if (node.isInteractive)
+                {
+                    results.push(node);
+                }
+
+                if (node.children)
+                {
+                    for (const child of node.children)
+                    {
+                        results.push(...findInteractiveElements(child));
+                    }
+                }
+
+                return results;
+            }
+
+            const interactiveElements = findInteractiveElements(tree);
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: `Found ${interactiveElements.length} interactive elements`,
+                data: {
+                    timestamp: new Date().toISOString(),
+                    elements: interactiveElements
+                }
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+
+    /**
+     * Get XPaths for elements
+     * @returns {Promise<BrowserServiceResponse>} Response with element XPaths
+     */
+    async getElementXpaths(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+            const tree = await page.evaluate(domTraversalScript);
+
+            // Extract all elements with their XPaths
+            function collectXPaths(node: any): any[] {
+                const results: any[] = [];
+
+                if (node.xpath)
+                {
+                    results.push({
+                        xpath: node.xpath,
+                        tagName: node.tagName,
+                        attributes: node.attributes,
+                        isInteractive: node.isInteractive
+                    });
+                }
+
+                if (node.children)
+                {
+                    for (const child of node.children)
+                    {
+                        results.push(...collectXPaths(child));
+                    }
+                }
+
+                return results;
+            }
+
+            const elements = collectXPaths(tree);
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: `Found ${elements.length} elements with XPaths`,
+                data: {
+                    timestamp: new Date().toISOString(),
+                    elements
+                }
             };
         } catch (error)
         {

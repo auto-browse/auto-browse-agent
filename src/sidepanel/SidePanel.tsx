@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect, FormEvent } from "react";
-import { Settings, Send, FileText, Link as LinkIcon, Code, Info, Camera, Accessibility } from "lucide-react";
+import {
+    Settings, Send, FileText, Link as LinkIcon, Code, Info,
+    Camera, Accessibility, GitFork, Cookie, Ghost, Target, Compass
+} from "lucide-react";
 import { useMessageHandler } from "./hooks/useMessageHandler";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -187,6 +190,46 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                                 <Accessibility className="h-4 w-4 mr-2" />
                                 A11y Snapshot
                             </Button>
+                            <Button
+                                size="sm"
+                                className="bg-green-100 hover:bg-green-200 text-green-800 dark:bg-green-900 dark:hover:bg-green-800 dark:text-green-200"
+                                onClick={() => handleDebugCommand(ActionType.GET_DOM_TREE)}
+                            >
+                                <GitFork className="h-4 w-4 mr-2" />
+                                DOM Tree
+                            </Button>
+                            <Button
+                                size="sm"
+                                className="bg-orange-100 hover:bg-orange-200 text-orange-800 dark:bg-orange-900 dark:hover:bg-orange-800 dark:text-orange-200"
+                                onClick={() => handleDebugCommand(ActionType.ANALYZE_COOKIE_BANNERS)}
+                            >
+                                <Cookie className="h-4 w-4 mr-2" />
+                                Cookie UI
+                            </Button>
+                            <Button
+                                size="sm"
+                                className="bg-purple-100 hover:bg-purple-200 text-purple-800 dark:bg-purple-900 dark:hover:bg-purple-800 dark:text-purple-200"
+                                onClick={() => handleDebugCommand(ActionType.EXPLORE_SHADOW_DOM)}
+                            >
+                                <Ghost className="h-4 w-4 mr-2" />
+                                Shadow DOM
+                            </Button>
+                            <Button
+                                size="sm"
+                                className="bg-pink-100 hover:bg-pink-200 text-pink-800 dark:bg-pink-900 dark:hover:bg-pink-800 dark:text-pink-200"
+                                onClick={() => handleDebugCommand(ActionType.GET_INTERACTIVE_MAP)}
+                            >
+                                <Target className="h-4 w-4 mr-2" />
+                                Interactive Map
+                            </Button>
+                            <Button
+                                size="sm"
+                                className="bg-teal-100 hover:bg-teal-200 text-teal-800 dark:bg-teal-900 dark:hover:bg-teal-800 dark:text-teal-200"
+                                onClick={() => handleDebugCommand(ActionType.GET_ELEMENT_XPATHS)}
+                            >
+                                <Compass className="h-4 w-4 mr-2" />
+                                XPath Map
+                            </Button>
                         </div>
                     </div>
                     <Separator />
@@ -216,10 +259,35 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                                         className="mt-2 rounded-md w-full"
                                     />
                                 )}
+                                {/* Snapshot data display */}
                                 {message.response?.data?.snapshot && (
                                     <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
                                         <pre className="text-xs whitespace-pre-wrap">
                                             {JSON.stringify(message.response.data.snapshot, null, 2)}
+                                        </pre>
+                                    </div>
+                                )}
+                                {/* DOM tree display */}
+                                {message.response?.data?.tree && (
+                                    <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
+                                        <pre className="text-xs whitespace-pre-wrap">
+                                            {JSON.stringify(message.response.data.tree, null, 2)}
+                                        </pre>
+                                    </div>
+                                )}
+                                {/* Cookie banners display */}
+                                {message.response?.data?.elements && (
+                                    <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
+                                        <pre className="text-xs whitespace-pre-wrap">
+                                            {JSON.stringify(message.response.data.elements, null, 2)}
+                                        </pre>
+                                    </div>
+                                )}
+                                {/* Shadow DOM display */}
+                                {message.response?.data?.shadowHosts && (
+                                    <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
+                                        <pre className="text-xs whitespace-pre-wrap">
+                                            {JSON.stringify(message.response.data.shadowHosts, null, 2)}
                                         </pre>
                                     </div>
                                 )}

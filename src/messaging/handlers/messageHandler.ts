@@ -73,6 +73,56 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
+            case ActionType.GET_DOM_TREE: {
+                const response = await browserService.getDomTree();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
+            case ActionType.ANALYZE_COOKIE_BANNERS: {
+                const response = await browserService.analyzeCookieBanners();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
+            case ActionType.EXPLORE_SHADOW_DOM: {
+                const response = await browserService.exploreShadowDom();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
+            case ActionType.GET_INTERACTIVE_MAP: {
+                const response = await browserService.getInteractiveMap();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
+            case ActionType.GET_ELEMENT_XPATHS: {
+                const response = await browserService.getElementXpaths();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
             case ActionType.TAKE_SCREENSHOT: {
                 const response = await browserService.takeScreenshot();
                 return {
