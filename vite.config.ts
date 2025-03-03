@@ -42,6 +42,10 @@ export default defineConfig({
                 if (fs.existsSync(resolve(__dirname, src)))
                 {
                     const content = fs.readFileSync(resolve(__dirname, src), "utf-8");
+                    // Add stylesheet link first
+                    const styleSheet = '<link rel="stylesheet" href="globals.css">';
+
+                    // Add script tags
                     const scriptTags = [
                         ...chunks.map(
                             (chunk) => `<script src="${chunk}" type="module"></script>`
@@ -52,7 +56,13 @@ export default defineConfig({
                         )}" type="module"></script>`
                     ].join("\n");
 
-                    const modifiedContent = content.replace(
+                    // Update the content with both CSS and JS
+                    let modifiedContent = content;
+                    modifiedContent = modifiedContent.replace(
+                        /<link.*?href=["'].*?\.css["'].*?>/,
+                        styleSheet
+                    );
+                    modifiedContent = modifiedContent.replace(
                         /<script.*?src=["'].*?\.js["'].*?><\/script>/,
                         scriptTags
                     );
@@ -115,8 +125,8 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 background: resolve(__dirname, "src/background/background.ts"),
-                popup: resolve(__dirname, "src/popup/popup.ts"),
-                options: resolve(__dirname, "src/options/options.ts"),
+                popup: resolve(__dirname, "src/popup/index.tsx"),
+                options: resolve(__dirname, "src/options/index.tsx"),
                 sidepanel: resolve(__dirname, "src/sidepanel/index.tsx")
             },
             output: {
