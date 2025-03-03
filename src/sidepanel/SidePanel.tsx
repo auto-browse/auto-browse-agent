@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, FormEvent } from "react";
-import { Settings, Send, FileText, Link as LinkIcon, Code, Info, Camera } from "lucide-react";
+import { Settings, Send, FileText, Link as LinkIcon, Code, Info, Camera, Accessibility } from "lucide-react";
 import { useMessageHandler } from "./hooks/useMessageHandler";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -179,6 +179,14 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                                 <Camera className="h-4 w-4 mr-2" />
                                 Take Screenshot
                             </Button>
+                            <Button
+                                size="sm"
+                                className="bg-violet-100 hover:bg-violet-200 text-violet-800 dark:bg-violet-900 dark:hover:bg-violet-800 dark:text-violet-200"
+                                onClick={() => handleDebugCommand(ActionType.GET_ACCESSIBILITY_SNAPSHOT)}
+                            >
+                                <Accessibility className="h-4 w-4 mr-2" />
+                                A11y Snapshot
+                            </Button>
                         </div>
                     </div>
                     <Separator />
@@ -207,6 +215,13 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                                         alt="Page Screenshot"
                                         className="mt-2 rounded-md w-full"
                                     />
+                                )}
+                                {message.response?.data?.snapshot && (
+                                    <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
+                                        <pre className="text-xs whitespace-pre-wrap">
+                                            {JSON.stringify(message.response.data.snapshot, null, 2)}
+                                        </pre>
+                                    </div>
                                 )}
                                 <span
                                     className={`text-xs mt-1 block ${

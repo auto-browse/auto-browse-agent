@@ -146,6 +146,39 @@ class BrowserService {
      * Analyze the current page structure
      * @returns {Promise<BrowserServiceResponse>} Response with page analysis
      */
+    /**
+     * Get accessibility snapshot of the current page using Puppeteer
+     * @returns {Promise<BrowserServiceResponse>} Response with accessibility data
+     */
+    async getAccessibilitySnapshot(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+
+            // Get Puppeteer's accessibility snapshot
+            const snapshot = await page.accessibility.snapshot({
+                interestingOnly: false // Get all nodes, not just interesting ones
+            });
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: "Accessibility Snapshot",
+                data: {
+                    timestamp: new Date().toISOString(),
+                    snapshot: snapshot
+                }
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+
+    /**
+     * Take a screenshot of the current page
+     * @returns {Promise<BrowserServiceResponse>} Response with screenshot data
+     */
     async takeScreenshot(): Promise<BrowserServiceResponse> {
         try
         {

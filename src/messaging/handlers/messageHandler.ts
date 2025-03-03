@@ -63,6 +63,16 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
+            case ActionType.GET_ACCESSIBILITY_SNAPSHOT: {
+                const response = await browserService.getAccessibilitySnapshot();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
             case ActionType.TAKE_SCREENSHOT: {
                 const response = await browserService.takeScreenshot();
                 return {

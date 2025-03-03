@@ -10,6 +10,7 @@ export interface BrowserServiceResponse {
     message: string;
     error?: Error;
     screenshot?: string; // Base64 encoded image data
+    data?: any; // For structured response data like accessibility snapshot
 }
 
 export interface ChromeTab {
