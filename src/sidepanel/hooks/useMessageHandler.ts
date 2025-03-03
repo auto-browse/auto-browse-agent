@@ -4,15 +4,21 @@ import { ActionType, MessageRequest, MessageResponse } from "@/messaging/types";
 
 export const useMessageHandler = () => {
     const [message, setMessage] = useState<string>("");
+    const [screenshot, setScreenshot] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleAction = async (action: ActionType): Promise<MessageResponse> => {
         setIsLoading(true);
+        setScreenshot(null); // Reset screenshot state
         try
         {
             const request: MessageRequest = { action };
             const response = await handleMessage(request);
             setMessage(response.message);
+            if (response.screenshot)
+            {
+                setScreenshot(response.screenshot);
+            }
             return response;
         } catch (error)
         {
@@ -34,5 +40,6 @@ export const useMessageHandler = () => {
         message,
         isLoading,
         handleAction,
+        screenshot,
     };
 };

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, FormEvent } from "react";
-import { Settings, Send, FileText, Link as LinkIcon, Code, Info } from "lucide-react";
+import { Settings, Send, FileText, Link as LinkIcon, Code, Info, Camera } from "lucide-react";
 import { useMessageHandler } from "./hooks/useMessageHandler";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -171,6 +171,14 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                                 <Info className="h-4 w-4 mr-2" />
                                 Get Metadata
                             </Button>
+                            <Button
+                                size="sm"
+                                className="bg-rose-100 hover:bg-rose-200 text-rose-800 dark:bg-rose-900 dark:hover:bg-rose-800 dark:text-rose-200"
+                                onClick={() => handleDebugCommand(ActionType.TAKE_SCREENSHOT)}
+                            >
+                                <Camera className="h-4 w-4 mr-2" />
+                                Take Screenshot
+                            </Button>
                         </div>
                     </div>
                     <Separator />
@@ -193,6 +201,13 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                                 }`}
                             >
                                 <p className="text-sm">{message.content}</p>
+                                {message.response?.screenshot && (
+                                    <img
+                                        src={message.response.screenshot}
+                                        alt="Page Screenshot"
+                                        className="mt-2 rounded-md w-full"
+                                    />
+                                )}
                                 <span
                                     className={`text-xs mt-1 block ${
                                         message.sender === "user" ? "text-blue-100" : "text-gray-500 dark:text-gray-400"

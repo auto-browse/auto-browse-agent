@@ -146,6 +146,29 @@ class BrowserService {
      * Analyze the current page structure
      * @returns {Promise<BrowserServiceResponse>} Response with page analysis
      */
+    async takeScreenshot(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+
+            const screenshot = await page.screenshot({
+                encoding: "base64",
+                fullPage: true,
+                type: "png"
+            });
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: "Screenshot captured successfully",
+                screenshot: `data:image/png;base64,${screenshot}`
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+
     async analyzePage(): Promise<BrowserServiceResponse> {
         try
         {

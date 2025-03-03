@@ -63,6 +63,16 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
+            case ActionType.TAKE_SCREENSHOT: {
+                const response = await browserService.takeScreenshot();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    screenshot: response.screenshot
+                };
+            }
+
             default:
                 return {
                     success: false,

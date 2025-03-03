@@ -9,6 +9,7 @@ export interface BrowserServiceResponse {
     success: boolean;
     message: string;
     error?: Error;
+    screenshot?: string; // Base64 encoded image data
 }
 
 export interface ChromeTab {
