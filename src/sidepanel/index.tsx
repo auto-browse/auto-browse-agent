@@ -9,8 +9,12 @@ if (!root) {
     throw new Error("Root element not found");
 }
 
+const handleOpenOptions = () => {
+    chrome.runtime.openOptionsPage();
+};
+
 createRoot(root).render(
     <React.StrictMode>
-        <SidePanel />
+        <SidePanel onOpenOptions={handleOpenOptions} />
     </React.StrictMode>
 );
