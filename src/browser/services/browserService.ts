@@ -82,6 +82,106 @@ class BrowserService {
             throw new Error(`Browser connection failed: ${connectError instanceof Error ? connectError.message : String(connectError)}`);
         }
     }
+
+    /**
+     * Count all elements on the current page
+     * @returns {Promise<BrowserServiceResponse>} Response with element count
+     */
+    async countElements(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+
+            const count = await page.evaluate(() => document.getElementsByTagName('*').length);
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: `Found ${count} elements on the page`
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+
+    /**
+     * Get page metadata
+     * @returns {Promise<BrowserServiceResponse>} Response with page metadata
+     */
+    async getMetadata(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+
+            const metadata = await page.evaluate(() => {
+                const metaTags = document.getElementsByTagName('meta');
+                const metadata: Record<string, string> = {};
+
+                for (const tag of metaTags)
+                {
+                    const name = tag.getAttribute('name') || tag.getAttribute('property');
+                    const content = tag.getAttribute('content');
+                    if (name && content)
+                    {
+                        metadata[name] = content;
+                    }
+                }
+
+                return metadata;
+            });
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: `Page Metadata: ${JSON.stringify(metadata, null, 2)}`
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
+
+    /**
+     * Analyze the current page structure
+     * @returns {Promise<BrowserServiceResponse>} Response with page analysis
+     */
+    async analyzePage(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { browser, page } = await this.connectToActivePage();
+
+            const analysis = await page.evaluate(() => {
+                const stats = {
+                    links: document.getElementsByTagName('a').length,
+                    images: document.getElementsByTagName('img').length,
+                    buttons: document.getElementsByTagName('button').length,
+                    inputs: document.getElementsByTagName('input').length,
+                    headings: {
+                        h1: document.getElementsByTagName('h1').length,
+                        h2: document.getElementsByTagName('h2').length,
+                        h3: document.getElementsByTagName('h3').length
+                    }
+                };
+
+                return stats;
+            });
+
+            await browser.disconnect();
+            return {
+                success: true,
+                message: `Page Analysis:\n` +
+                    `- Links: ${analysis.links}\n` +
+                    `- Images: ${analysis.images}\n` +
+                    `- Buttons: ${analysis.buttons}\n` +
+                    `- Input fields: ${analysis.inputs}\n` +
+                    `- Headings: H1 (${analysis.headings.h1}), H2 (${analysis.headings.h2}), H3 (${analysis.headings.h3})`
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        }
+    }
 }
 
 export const browserService = new BrowserService();

@@ -1,20 +1,20 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { SidePanel } from "./SidePanel";
+import OptionsPage from "./components/OptionsPage";
+import { Toaster } from "sonner";
 import "@/styles/globals.css";
 
-const root = document.getElementById("sidepanel-root");
+const root = document.getElementById("options-root");
 
 if (!root) {
     throw new Error("Root element not found");
 }
 
-const handleOpenOptions = () => {
-    chrome.runtime.openOptionsPage();
-};
-
 createRoot(root).render(
     <React.StrictMode>
-        <SidePanel onOpenOptions={handleOpenOptions} />
+        <>
+            <OptionsPage />
+            <Toaster />
+        </>
     </React.StrictMode>
 );

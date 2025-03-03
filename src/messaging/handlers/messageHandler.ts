@@ -36,6 +36,33 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
+            case ActionType.COUNT_ELEMENTS: {
+                const response = await browserService.countElements();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error
+                };
+            }
+
+            case ActionType.GET_METADATA: {
+                const response = await browserService.getMetadata();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error
+                };
+            }
+
+            case ActionType.ANALYZE_PAGE: {
+                const response = await browserService.analyzePage();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error
+                };
+            }
+
             default:
                 return {
                     success: false,
