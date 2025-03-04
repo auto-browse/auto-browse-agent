@@ -1,10 +1,12 @@
+import { LLMProviderName } from "@/llm/types/providers";
+
 export interface ApiKey {
-    provider: string;
+    provider: LLMProviderName;
     key: string;
 }
 
 export interface Settings {
-    selectedProvider: string;
+    selectedProvider: LLMProviderName;
     apiKeys: ApiKey[];
 }
 

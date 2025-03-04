@@ -2,18 +2,19 @@ import React, { useState, useEffect } from "react";
 import { Save, AlertTriangle } from "lucide-react";
 import { storageService } from "@/storage/services/storageService";
 import { ApiKey, Settings } from "@/storage/types/settings";
+import { LLMProviders, LLMProviderName } from "@/llm/types/providers";
 import { toast } from "sonner";
 
 const initialApiKeys: ApiKey[] = [
-    { provider: "OpenAI", key: "" },
-    { provider: "Anthropic", key: "" },
-    { provider: "Google AI", key: "" },
-    { provider: "Cohere", key: "" }
+    { provider: LLMProviders.OPENAI, key: "" },
+    { provider: LLMProviders.ANTHROPIC, key: "" },
+    { provider: LLMProviders.GOOGLE_AI, key: "" },
+    { provider: LLMProviders.COHERE, key: "" }
 ];
 
 export const OptionsPage: React.FC = () => {
     const [apiKeys, setApiKeys] = useState<ApiKey[]>(initialApiKeys);
-    const [selectedProvider, setSelectedProvider] = useState("OpenAI");
+    const [selectedProvider, setSelectedProvider] = useState<LLMProviderName>(LLMProviders.OPENAI);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -25,8 +26,17 @@ export const OptionsPage: React.FC = () => {
             const response = await storageService.getData("settings");
             if (response.data) {
                 const settings = response.data as Settings;
-                setApiKeys(settings.apiKeys);
-                setSelectedProvider(settings.selectedProvider);
+                // Ensure the loaded data matches our provider types
+                const validApiKeys = settings.apiKeys.filter(key =>
+                    Object.values(LLMProviders).includes(key.provider as LLMProviderName)
+                );
+                setApiKeys(validApiKeys.length ? validApiKeys : initialApiKeys);
+
+                // Ensure the selected provider is valid
+                const validProvider = Object.values(LLMProviders).includes(settings.selectedProvider as LLMProviderName)
+                    ? settings.selectedProvider
+                    : LLMProviders.OPENAI;
+                setSelectedProvider(validProvider as LLMProviderName);
             }
         } catch (error) {
             toast.error("Error loading settings");
@@ -36,7 +46,7 @@ export const OptionsPage: React.FC = () => {
         }
     };
 
-    const handleApiKeyChange = (provider: string, key: string) => {
+    const handleApiKeyChange = (provider: LLMProviderName, key: string) => {
         setApiKeys(apiKeys.map(item =>
             item.provider === provider ? { ...item, key } : item
         ));
@@ -77,7 +87,7 @@ export const OptionsPage: React.FC = () => {
                         <select
                             id="provider-select"
                             value={selectedProvider}
-                            onChange={(e) => setSelectedProvider(e.target.value)}
+                            onChange={(e) => setSelectedProvider(e.target.value as LLMProviderName)}
                             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             {apiKeys.map(item => (

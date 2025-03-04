@@ -17,7 +17,7 @@ interface SidePanelProps {
 }
 
 export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
-    const { handleAction } = useMessageHandler();
+    const { handleAction, handleChat } = useMessageHandler();
     const [isDebugMode, setIsDebugMode] = useState(false);
     const [inputMessage, setInputMessage] = useState("");
     const [messages, setMessages] = useState<ChatMessage[]>([
@@ -54,26 +54,54 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
     const handleSendMessage = async () => {
         if (!inputMessage.trim()) return;
 
-        const newMessage: ChatMessage = {
+        const userMessage: ChatMessage = {
             id: Date.now().toString(),
             content: inputMessage,
             sender: "user",
             timestamp: new Date(),
         };
 
-        setMessages((prev) => [...prev, newMessage]);
+        setMessages((prev) => [...prev, userMessage]);
+        const currentMessage = inputMessage;
         setInputMessage("");
 
-        // Simulate assistant response
-        const assistantResponse: ChatMessage = {
-            id: (Date.now() + 1).toString(),
-            content: isDebugMode
-                ? "Debug mode is active. Please use the debug commands for assistance."
-                : "I understand your request. How else can I help you?",
-            sender: "assistant",
-            timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantResponse]);
+        if (isDebugMode) {
+            const assistantResponse: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                content: "Debug mode is active. Please use the debug commands for assistance.",
+                sender: "assistant",
+                timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, assistantResponse]);
+            return;
+        }
+
+        try {
+            const response = await handleChat(currentMessage);
+            const assistantResponse: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                content: response.message,
+                sender: "assistant",
+                timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, assistantResponse]);
+
+            if (!response.success) {
+                toast.error(response.message);
+            }
+        } catch (error) {
+            console.error('Error in chat:', error);
+            const errorMessage = error instanceof Error ? error.message : "An error occurred";
+            toast.error(errorMessage);
+
+            const errorResponse: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                content: `Error: ${errorMessage}`,
+                sender: "assistant",
+                timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, errorResponse]);
+        }
     };
 
     const handleDebugCommand = async (action: ActionType) => {

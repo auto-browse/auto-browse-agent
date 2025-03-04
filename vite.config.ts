@@ -116,7 +116,7 @@ export default defineConfig({
         }
     },
     optimizeDeps: {
-        include: ["puppeteer-core", "chromium-bidi"]
+        include: ["puppeteer-core", "chromium-bidi", "zod"]
     },
     build: {
         minify: false,
