@@ -30,8 +30,9 @@ export async function createAgent() {
     });
 
     const browserTools = createBrowserTools();
+    const llmWithTools = model.bindTools(browserTools, { parallel_tool_calls: false });
     return await createReactAgent({
-        llm: model,
+        llm: llmWithTools,
         tools: browserTools
     });
 }
