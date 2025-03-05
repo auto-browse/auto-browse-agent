@@ -40,13 +40,15 @@ export function createBrowserTools() {
         func: async ({ url }: GotoParams) => {
             try
             {
-                const { browser, page } = await browserService.connectToActivePage();
+                const { page } = await browserService.getOrCreateConnection();
                 await page.goto(url);
-                await browser.disconnect();
                 return `Successfully navigated to ${url}`;
             } catch (error)
             {
                 return `Error navigating to ${url}: ${error instanceof Error ? error.message : String(error)}`;
+            } finally
+            {
+                await browserService.closeConnection();
             }
         }
     });
@@ -58,14 +60,16 @@ export function createBrowserTools() {
         func: async ({ selector }: ClickParams) => {
             try
             {
-                const { browser, page } = await browserService.connectToActivePage();
+                const { page } = await browserService.getOrCreateConnection();
                 await page.waitForSelector(selector);
                 await page.click(selector);
-                await browser.disconnect();
                 return `Successfully clicked element at ${selector}`;
             } catch (error)
             {
                 return `Error clicking element at ${selector}: ${error instanceof Error ? error.message : String(error)}`;
+            } finally
+            {
+                await browserService.closeConnection();
             }
         }
     });
@@ -77,14 +81,16 @@ export function createBrowserTools() {
         func: async ({ selector, value }: FillParams) => {
             try
             {
-                const { browser, page } = await browserService.connectToActivePage();
+                const { page } = await browserService.getOrCreateConnection();
                 await page.waitForSelector(selector);
                 await page.type(selector, value);
-                await browser.disconnect();
                 return `Successfully filled element at ${selector} with provided value`;
             } catch (error)
             {
                 return `Error filling element at ${selector}: ${error instanceof Error ? error.message : String(error)}`;
+            } finally
+            {
+                await browserService.closeConnection();
             }
         }
     });

@@ -12,6 +12,55 @@ import { BrowserConnection, BrowserServiceResponse } from "../types";
  * Service class for managing browser operations using Puppeteer
  */
 class BrowserService {
+    private activeConnection: BrowserConnection | null = null;
+    private connectionClosing: Promise<void> | null = null;
+
+    /**
+     * Gets an existing browser connection or creates a new one
+     * @returns {Promise<BrowserConnection>} Browser and page connection
+     */
+    async getOrCreateConnection(): Promise<BrowserConnection> {
+        // Wait for any pending connection closure
+        if (this.connectionClosing)
+        {
+            await this.connectionClosing;
+        }
+
+        if (this.activeConnection)
+        {
+            return this.activeConnection;
+        }
+
+        // Small delay to ensure previous connection is fully cleaned up
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        this.activeConnection = await this.connectToActivePage();
+        return this.activeConnection;
+    }
+
+    /**
+     * Safely closes the current browser connection
+     */
+    async closeConnection(): Promise<void> {
+        if (this.activeConnection)
+        {
+            this.connectionClosing = (async () => {
+                try
+                {
+                    await this.activeConnection!.browser.disconnect();
+                } catch (error)
+                {
+                    console.error("Error disconnecting browser:", error);
+                } finally
+                {
+                    this.activeConnection = null;
+                    this.connectionClosing = null;
+                }
+            })();
+            await this.connectionClosing;
+        }
+    }
+
     /**
      * Get the title of the current active tab
      * @returns {Promise<BrowserServiceResponse>} Response with page title or error
@@ -19,20 +68,9 @@ class BrowserService {
     async getPageTitle(): Promise<BrowserServiceResponse> {
         try
         {
-            const tab = await getActiveTab();
-            if (!tab.id)
-            {
-                throw new Error("No tab ID found");
-            }
-
-            const browser = await connect({
-                transport: await ExtensionTransport.connectTab(tab.id)
-            });
-
-            const [page] = await browser.pages();
+            const { page } = await this.getOrCreateConnection();
             const title = await page.title();
 
-            await browser.disconnect();
             return {
                 success: true,
                 message: `Current page title: ${title}`
@@ -40,6 +78,9 @@ class BrowserService {
         } catch (error)
         {
             return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
         }
     }
 
@@ -91,11 +132,9 @@ class BrowserService {
     async countElements(): Promise<BrowserServiceResponse> {
         try
         {
-            const { browser, page } = await this.connectToActivePage();
-
+            const { page } = await this.getOrCreateConnection();
             const count = await page.evaluate(() => document.getElementsByTagName('*').length);
 
-            await browser.disconnect();
             return {
                 success: true,
                 message: `Found ${count} elements on the page`
@@ -103,6 +142,9 @@ class BrowserService {
         } catch (error)
         {
             return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
         }
     }
 
@@ -113,8 +155,7 @@ class BrowserService {
     async getMetadata(): Promise<BrowserServiceResponse> {
         try
         {
-            const { browser, page } = await this.connectToActivePage();
-
+            const { page } = await this.getOrCreateConnection();
             const metadata = await page.evaluate(() => {
                 const metaTags = document.getElementsByTagName('meta');
                 const metadata: Record<string, string> = {};
@@ -132,7 +173,6 @@ class BrowserService {
                 return metadata;
             });
 
-            await browser.disconnect();
             return {
                 success: true,
                 message: `Page Metadata: ${JSON.stringify(metadata, null, 2)}`
@@ -140,6 +180,9 @@ class BrowserService {
         } catch (error)
         {
             return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
         }
     }
 
@@ -154,14 +197,13 @@ class BrowserService {
     async getAccessibilitySnapshot(): Promise<BrowserServiceResponse> {
         try
         {
-            const { browser, page } = await this.connectToActivePage();
+            const { page } = await this.getOrCreateConnection();
 
             // Get Puppeteer's accessibility snapshot
             const snapshot = await page.accessibility.snapshot({
                 interestingOnly: true // Do not Get all nodes, just interesting ones
             });
 
-            await browser.disconnect();
             return {
                 success: true,
                 message: "Accessibility Snapshot",
@@ -173,6 +215,9 @@ class BrowserService {
         } catch (error)
         {
             return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
         }
     }
 
@@ -183,15 +228,13 @@ class BrowserService {
     async takeScreenshot(): Promise<BrowserServiceResponse> {
         try
         {
-            const { browser, page } = await this.connectToActivePage();
-
+            const { page } = await this.getOrCreateConnection();
             const screenshot = await page.screenshot({
                 encoding: "base64",
                 fullPage: true,
                 type: "png"
             });
 
-            await browser.disconnect();
             return {
                 success: true,
                 message: "Screenshot captured successfully",
@@ -200,14 +243,16 @@ class BrowserService {
         } catch (error)
         {
             return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
         }
     }
 
     async analyzePage(): Promise<BrowserServiceResponse> {
         try
         {
-            const { browser, page } = await this.connectToActivePage();
-
+            const { page } = await this.getOrCreateConnection();
             const analysis = await page.evaluate(() => {
                 const stats = {
                     links: document.getElementsByTagName('a').length,
@@ -224,7 +269,6 @@ class BrowserService {
                 return stats;
             });
 
-            await browser.disconnect();
             return {
                 success: true,
                 message: `Page Analysis:\n` +
@@ -237,6 +281,9 @@ class BrowserService {
         } catch (error)
         {
             return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
         }
     }
     /**
@@ -246,10 +293,9 @@ class BrowserService {
     async getDomTree(): Promise<BrowserServiceResponse> {
         try
         {
-            const { browser, page } = await this.connectToActivePage();
+            const { page } = await this.getOrCreateConnection();
             const tree = await page.evaluate(domTraversalScript);
 
-            await browser.disconnect();
             return {
                 success: true,
                 message: "DOM Tree Snapshot",
@@ -261,6 +307,9 @@ class BrowserService {
         } catch (error)
         {
             return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
         }
     }
 
@@ -271,7 +320,7 @@ class BrowserService {
     async analyzeCookieBanners(): Promise<BrowserServiceResponse> {
         try
         {
-            const { browser, page } = await this.connectToActivePage();
+            const { page } = await this.getOrCreateConnection();
             const tree = await page.evaluate(domTraversalScript);
 
             // Filter tree to find cookie/consent related elements
@@ -303,7 +352,6 @@ class BrowserService {
 
             const cookieBanners = findCookieBanners(tree);
 
-            await browser.disconnect();
             return {
                 success: true,
                 message: `Found ${cookieBanners.length} cookie-related interactive elements`,
@@ -315,6 +363,9 @@ class BrowserService {
         } catch (error)
         {
             return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
         }
     }
 
@@ -325,7 +376,7 @@ class BrowserService {
     async exploreShadowDom(): Promise<BrowserServiceResponse> {
         try
         {
-            const { browser, page } = await this.connectToActivePage();
+            const { page } = await this.getOrCreateConnection();
             const tree = await page.evaluate(domTraversalScript);
 
             // Filter tree to find shadow roots
@@ -350,7 +401,6 @@ class BrowserService {
 
             const shadowHosts = findShadowRoots(tree);
 
-            await browser.disconnect();
             return {
                 success: true,
                 message: `Found ${shadowHosts.length} shadow DOM roots`,
@@ -362,6 +412,9 @@ class BrowserService {
         } catch (error)
         {
             return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
         }
     }
 
@@ -372,7 +425,7 @@ class BrowserService {
     async getInteractiveMap(): Promise<BrowserServiceResponse> {
         try
         {
-            const { browser, page } = await this.connectToActivePage();
+            const { page } = await this.getOrCreateConnection();
             const tree = await page.evaluate(domTraversalScript);
 
             // Filter tree to find interactive elements with positions
@@ -397,7 +450,6 @@ class BrowserService {
 
             const interactiveElements = findInteractiveElements(tree);
 
-            await browser.disconnect();
             return {
                 success: true,
                 message: `Found ${interactiveElements.length} interactive elements`,
@@ -409,6 +461,9 @@ class BrowserService {
         } catch (error)
         {
             return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
         }
     }
 
@@ -419,7 +474,7 @@ class BrowserService {
     async getElementXpaths(): Promise<BrowserServiceResponse> {
         try
         {
-            const { browser, page } = await this.connectToActivePage();
+            const { page } = await this.getOrCreateConnection();
             const tree = await page.evaluate(domTraversalScript);
 
             // Extract all elements with their XPaths
@@ -449,7 +504,6 @@ class BrowserService {
 
             const elements = collectXPaths(tree);
 
-            await browser.disconnect();
             return {
                 success: true,
                 message: `Found ${elements.length} elements with XPaths`,
@@ -461,6 +515,9 @@ class BrowserService {
         } catch (error)
         {
             return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
         }
     }
 }
