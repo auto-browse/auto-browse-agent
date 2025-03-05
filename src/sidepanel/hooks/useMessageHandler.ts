@@ -2,6 +2,7 @@ import { useState } from "react";
 import { handleMessage } from "@/messaging/handlers/messageHandler";
 import { ActionType, MessageRequest, MessageResponse } from "@/messaging/types";
 import { agentService } from "@/llm/services/agentService";
+// import { StreamEvent } from "@langchain/core/tracers/log_stream";
 
 export const useMessageHandler = () => {
     const [message, setMessage] = useState<string>("");
@@ -15,13 +16,20 @@ export const useMessageHandler = () => {
             const stream = await agentService.processMessage(message);
             let fullResponse = "";
 
-            for await (const { messages } of stream)
+            for await (const event of stream)
             {
-                const lastMessage = messages[messages.length - 1];
-                if (lastMessage?.content)
+                if ("data" in event && typeof event.data === "string")
                 {
-                    fullResponse = lastMessage.content;
-                    setMessage(fullResponse);
+                    const data = JSON.parse(event.data);
+                    if (data.messages && data.messages.length > 0)
+                    {
+                        const lastMessage = data.messages[data.messages.length - 1];
+                        if (lastMessage?.content)
+                        {
+                            fullResponse = lastMessage.content;
+                            setMessage(fullResponse);
+                        }
+                    }
                 }
             }
 
