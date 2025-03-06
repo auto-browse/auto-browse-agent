@@ -16,6 +16,16 @@ export const useMessageHandler = () => {
             const stream = await agentService.processMessage(message);
             let fullResponse = "";
 
+            // Format timestamp
+            const time = new Intl.DateTimeFormat('en-US', {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true
+            }).format(new Date());
+
+            // Start with timestamp
+            setMessage(`${time}`);
+
             for await (const [message, _metadata] of stream)
             {
                 if (isAIMessageChunk(message))
@@ -23,15 +33,18 @@ export const useMessageHandler = () => {
                     if (message.tool_call_chunks?.length)
                     {
                         const chunk = message.tool_call_chunks[0];
-                        setMessage(prev => prev + `\n${message.getType()} MESSAGE TOOL CALL CHUNK: ${chunk.args}`);
+                        setMessage(prev => `${prev}\n${message.getType()} MESSAGE TOOL CALL CHUNK: ${chunk.args}`);
                     }
                     else if (message.content)
                     {
                         fullResponse += String(message.content);
-                        setMessage(prev => prev + `\n${message.getType()} MESSAGE CONTENT: ${message.content}`);
+                        setMessage(prev => `${prev}\n${message.getType()} MESSAGE CONTENT: ${message.content}`);
                     }
                 }
             }
+
+            // Add timestamp at the end
+            setMessage(prev => `${prev}\n${time}`);
 
             return {
                 success: true,
