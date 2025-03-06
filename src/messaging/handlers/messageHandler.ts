@@ -113,6 +113,16 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
+            case ActionType.GET_FORMATTED_INTERACTIVE_MAP: {
+                const response = await browserService.getFormattedInteractiveMap();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
             case ActionType.GET_ELEMENT_XPATHS: {
                 const response = await browserService.getElementXpaths();
                 return {

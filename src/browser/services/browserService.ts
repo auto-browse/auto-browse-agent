@@ -8,6 +8,21 @@ import { getActiveTab, handleError } from "../utils";
 import { domTraversalScript } from "../utils/domTraversal";
 import { BrowserConnection, BrowserServiceResponse } from "../types";
 
+const INTERACTIVE_ELEMENT_ATTRIBUTES = [
+    'browser-user-highlight-id',
+    'title',
+    'type',
+    'name',
+    'role',
+    'tabindex',
+    'aria-label',
+    'placeholder',
+    'value',
+    'alt',
+    'aria-expanded',
+    'aria_name'
+];
+
 /**
  * Service class for managing browser operations using Puppeteer
  */
@@ -453,6 +468,81 @@ class BrowserService {
             return {
                 success: true,
                 message: `Found ${interactiveElements.length} interactive elements`,
+                data: {
+                    timestamp: new Date().toISOString(),
+                    elements: interactiveElements
+                }
+            };
+        } catch (error)
+        {
+            return handleError(error instanceof Error ? error : new Error(String(error)));
+        } finally
+        {
+            await this.closeConnection();
+        }
+    }
+
+    /**
+     * Get formatted interactive map with markdown-formatted attributes
+     * @returns {Promise<BrowserServiceResponse>} Response with formatted interactive elements
+     */
+    async getFormattedInteractiveMap(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { page } = await this.getOrCreateConnection();
+            const tree = await page.evaluate(domTraversalScript);
+
+            // Filter tree to find interactive elements with positions and format their attributes
+            function findInteractiveElements(node: any): any[] {
+                const results: any[] = [];
+
+                if (node.isInteractive)
+                {
+                    // Get values for our specific attributes
+                    const validAttributes = INTERACTIVE_ELEMENT_ATTRIBUTES
+                        .filter(attr => {
+                            const value = node.attributes?.[attr];
+                            return value && typeof value === 'string' && value.trim() !== '';
+                        })
+                        .map(attr => ({
+                            name: attr,
+                            value: node.attributes[attr]
+                        }));
+
+                    if (validAttributes.length > 0)
+                    {
+                        const formattedAttributes = validAttributes
+                            .map(({ name, value }) => `**${name}**: ${value}`)
+                            .join('\n');
+
+                        results.push({
+                            xpath: node.xpath,
+                            tagName: node.tagName,
+                            formattedAttributes,
+                            // Only include the specific attributes we want
+                            attributes: Object.fromEntries(
+                                validAttributes.map(({ name, value }) => [name, value])
+                            )
+                        });
+                    }
+                }
+
+                if (node.children)
+                {
+                    for (const child of node.children)
+                    {
+                        results.push(...findInteractiveElements(child));
+                    }
+                }
+
+                return results;
+            }
+
+            const interactiveElements = findInteractiveElements(tree);
+
+            return {
+                success: true,
+                message: `Found ${interactiveElements.length} interactive elements with formatted attributes`,
                 data: {
                     timestamp: new Date().toISOString(),
                     elements: interactiveElements

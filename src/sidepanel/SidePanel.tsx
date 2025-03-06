@@ -252,6 +252,14 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                             </Button>
                             <Button
                                 size="sm"
+                                className="bg-cyan-100 hover:bg-cyan-200 text-cyan-800 dark:bg-cyan-900 dark:hover:bg-cyan-800 dark:text-cyan-200"
+                                onClick={() => handleDebugCommand(ActionType.GET_FORMATTED_INTERACTIVE_MAP)}
+                            >
+                                <Target className="h-4 w-4 mr-2" />
+                                Formatted Interactive Map
+                            </Button>
+                            <Button
+                                size="sm"
                                 className="bg-teal-100 hover:bg-teal-200 text-teal-800 dark:bg-teal-900 dark:hover:bg-teal-800 dark:text-teal-200"
                                 onClick={() => handleDebugCommand(ActionType.GET_ELEMENT_XPATHS)}
                             >
@@ -303,12 +311,26 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                                         </pre>
                                     </div>
                                 )}
-                                {/* Cookie banners display */}
+                                {/* Cookie banners and Interactive Map display */}
                                 {message.response?.data?.elements && (
                                     <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
-                                        <pre className="text-xs whitespace-pre-wrap">
-                                            {JSON.stringify(message.response.data.elements, null, 2)}
-                                        </pre>
+                                        {message.action === ActionType.GET_FORMATTED_INTERACTIVE_MAP ? (
+                                            <div className="space-y-4">
+                                                {message.response.data.elements.map((element: any, index: number) => (
+                                                    <div key={index} className="markdown text-xs">
+                                                        <div className="font-medium mb-1">Element {index + 1}: {element.tagName}</div>
+                                                        <div dangerouslySetInnerHTML={{
+                                                            __html: element.formattedAttributes.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                                        }} />
+                                                        <div className="text-gray-500 mt-1">XPath: {element.xpath}</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <pre className="text-xs whitespace-pre-wrap">
+                                                {JSON.stringify(message.response.data.elements, null, 2)}
+                                            </pre>
+                                        )}
                                     </div>
                                 )}
                                 {/* Shadow DOM display */}
