@@ -69,7 +69,45 @@ class InteractiveMapService {
     }
 
     /**
-     * Get formatted interactive map with markdown-formatted attributes
+     * Get text content until the next interactive element
+     * @param node Current node to process
+     * @param maxDepth Maximum depth to traverse (-1 for unlimited)
+     * @returns Text content until next interactive element
+     */
+    private getTextUntilNextInteractive(node: any, maxDepth: number = -1): string {
+        const textParts: string[] = [];
+
+        function collectText(currentNode: any, currentDepth: number): void {
+            if (maxDepth !== -1 && currentDepth > maxDepth)
+            {
+                return;
+            }
+
+            // Skip this branch if we hit another interactive element (except the current node)
+            if (currentNode !== node && currentNode.isInteractive)
+            {
+                return;
+            }
+
+            // If it's a text node (checking via presence of text property and absence of children)
+            if (currentNode.text && !currentNode.children)
+            {
+                textParts.push(currentNode.text);
+            } else if (currentNode.children)
+            {
+                for (const child of currentNode.children)
+                {
+                    collectText(child, currentDepth + 1);
+                }
+            }
+        }
+
+        collectText(node, 0);
+        return textParts.join(' ').trim();
+    }
+
+    /**
+     * Get formatted interactive map with HTML-style output format
      * @returns {Promise<BrowserServiceResponse>} Response with formatted interactive elements
      */
     async getFormattedInteractiveMap(): Promise<BrowserServiceResponse> {
@@ -78,60 +116,61 @@ class InteractiveMapService {
             const { page } = await browserService.getOrCreateConnection();
             const tree = await page.evaluate(domTraversalScript);
 
-            // Filter tree to find interactive elements with positions and format their attributes
-            function findInteractiveElements(node: any): any[] {
-                const results: any[] = [];
+            const elements: any[] = [];
 
-                if (node.isInteractive)
+            // Process nodes recursively
+            const processNode = (node: any) => {
+                if (node.isInteractive && node.highlightIndex !== undefined)
                 {
-                    // Get values for our specific attributes
+                    // Get attributes as HTML string
                     const validAttributes = INTERACTIVE_ELEMENT_ATTRIBUTES
                         .filter(attr => {
                             const value = node.attributes?.[attr];
                             return value && typeof value === 'string' && value.trim() !== '';
-                        })
-                        .map(attr => ({
-                            name: attr,
-                            value: node.attributes[attr]
-                        }));
-
-                    if (validAttributes.length > 0)
-                    {
-                        const formattedAttributes = validAttributes
-                            .map(({ name, value }) => `**${name}**: ${value}`)
-                            .join('\n');
-
-                        results.push({
-                            xpath: node.xpath,
-                            tagName: node.tagName,
-                            formattedAttributes,
-                            // Only include the specific attributes we want
-                            attributes: Object.fromEntries(
-                                validAttributes.map(({ name, value }) => [name, value])
-                            )
                         });
-                    }
+
+                    // Build attributes string in HTML format
+                    const attributesStr = validAttributes
+                        .map(attr => `${attr}="${node.attributes[attr]}"`)
+                        .join(' ');
+
+                    // Get associated text content
+                    const textContent = this.getTextUntilNextInteractive(node);
+
+                    const element = {
+                        index: node.highlightIndex,
+                        tagName: node.tagName.toLowerCase(),
+                        attributesStr: attributesStr ? ' ' + attributesStr : '',
+                        textContent: textContent,
+                        // Format as: index[:]<tag attrs>text</tag>
+                        formattedOutput: `${node.highlightIndex}[:]<${node.tagName.toLowerCase()}${attributesStr ? ' ' + attributesStr : ''}>${textContent}</${node.tagName.toLowerCase()}>`
+                    };
+
+                    elements.push(element);
                 }
 
+                // Process children
                 if (node.children)
                 {
                     for (const child of node.children)
                     {
-                        results.push(...findInteractiveElements(child));
+                        processNode(child);
                     }
                 }
+            };
 
-                return results;
-            }
+            // Start processing from root
+            processNode(tree);
 
-            const interactiveElements = findInteractiveElements(tree);
+            // Sort elements by highlight index
+            elements.sort((a, b) => a.index - b.index);
 
             return {
                 success: true,
-                message: `Found ${interactiveElements.length} interactive elements with formatted attributes`,
+                message: `Found ${elements.length} interactive elements with formatted output`,
                 data: {
                     timestamp: new Date().toISOString(),
-                    elements: interactiveElements
+                    elements: elements
                 }
             };
         } catch (error)

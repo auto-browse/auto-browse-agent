@@ -315,14 +315,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                                 {message.response?.data?.elements && (
                                     <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
                                         {message.action === ActionType.GET_FORMATTED_INTERACTIVE_MAP ? (
-                                            <div className="space-y-4">
+                                            <div className="space-y-2">
                                                 {message.response.data.elements.map((element: any, index: number) => (
-                                                    <div key={index} className="markdown text-xs">
-                                                        <div className="font-medium mb-1">Element {index + 1}: {element.tagName}</div>
-                                                        <div dangerouslySetInnerHTML={{
-                                                            __html: element.formattedAttributes.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                                        }} />
-                                                        <div className="text-gray-500 mt-1">XPath: {element.xpath}</div>
+                                                    <div key={index} className="font-mono text-xs whitespace-pre-wrap">
+                                                        {element.formattedOutput}
                                                     </div>
                                                 ))}
                                             </div>

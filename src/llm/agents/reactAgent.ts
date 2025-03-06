@@ -36,7 +36,13 @@ export async function createAgent() {
     const accessibilityData = accessibilitySnapshot.success ? accessibilitySnapshot.data.snapshot : 'No accessibility data available';
     const formattedMap = await browserService.getFormattedInteractiveMap();
     const formattedMapData = formattedMap.success ? formattedMap.data.elements : 'No formatted map data available';
-    const customPrompt = `You are a helpful assistant that can browse the web. Use the accessibility snapshot and formatted interactive map to come up with a puppeteer selector which you can pass to call the required tools to complete the user requested action. Here Current page accessibility snapshot: ${JSON.stringify(accessibilityData)}. Current page formatted interactive map: ${JSON.stringify(formattedMapData)}`;
+
+    const formattedMapString = Array.isArray(formattedMapData)
+        ? formattedMapData.map(element => element.formattedOutput).join('\n')
+        : 'No formatted map data available';
+
+    const customPrompt = `You are a helpful assistant that can browse the web. Use the accessibility snapshot and formatted interactive map to come up with a puppeteer selector which you can pass to call the required tools to complete the user requested action. Here Current page accessibility snapshot: ${JSON.stringify(accessibilityData)}. Current page formatted interactive map:
+${formattedMapString}`;
 
     console.log(customPrompt);
 
