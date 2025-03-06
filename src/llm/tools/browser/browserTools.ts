@@ -1,4 +1,4 @@
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { browserService } from "../../../browser/services/browserService";
 
@@ -33,67 +33,73 @@ export function createBrowserTools() {
     });
 
     // Tool creation
-    const gotoTool = new DynamicStructuredTool({
-        name: "goto",
-        description: "Navigate to a specified URL",
-        schema: gotoSchema,
-        func: async ({ url }: GotoParams) => {
+    const gotoTool = tool(
+        async (input: GotoParams): Promise<string> => {
             try
             {
                 const { page } = await browserService.getOrCreateConnection();
-                await page.goto(url);
-                return `Successfully navigated to ${url}`;
+                await page.goto(input.url);
+                return `Successfully navigated to ${input.url}`;
             } catch (error)
             {
-                return `Error navigating to ${url}: ${error instanceof Error ? error.message : String(error)}`;
+                return `Error navigating to ${input.url}: ${error instanceof Error ? error.message : String(error)}`;
             } finally
             {
                 await browserService.closeConnection();
             }
+        },
+        {
+            name: "goto",
+            description: "Navigate to a specified URL",
+            schema: gotoSchema,
         }
-    });
+    );
 
-    const clickTool = new DynamicStructuredTool({
-        name: "click",
-        description: "Click an element on the page using a CSS selector",
-        schema: clickSchema,
-        func: async ({ selector }: ClickParams) => {
+    const clickTool = tool(
+        async (input: ClickParams): Promise<string> => {
             try
             {
                 const { page } = await browserService.getOrCreateConnection();
-                await page.waitForSelector(selector);
-                await page.click(selector);
-                return `Successfully clicked element at ${selector}`;
+                await page.waitForSelector(input.selector);
+                await page.click(input.selector);
+                return `Successfully clicked element at ${input.selector}`;
             } catch (error)
             {
-                return `Error clicking element at ${selector}: ${error instanceof Error ? error.message : String(error)}`;
+                return `Error clicking element at ${input.selector}: ${error instanceof Error ? error.message : String(error)}`;
             } finally
             {
                 await browserService.closeConnection();
             }
+        },
+        {
+            name: "click",
+            description: "Click an element on the page using a CSS selector",
+            schema: clickSchema,
         }
-    });
+    );
 
-    const fillTool = new DynamicStructuredTool({
-        name: "fill",
-        description: "Fill an input field on the page using a CSS selector",
-        schema: fillSchema,
-        func: async ({ selector, value }: FillParams) => {
+    const fillTool = tool(
+        async (input: FillParams): Promise<string> => {
             try
             {
                 const { page } = await browserService.getOrCreateConnection();
-                await page.waitForSelector(selector);
-                await page.type(selector, value);
-                return `Successfully filled element at ${selector} with provided value`;
+                await page.waitForSelector(input.selector);
+                await page.type(input.selector, input.value);
+                return `Successfully filled element at ${input.selector} with provided value`;
             } catch (error)
             {
-                return `Error filling element at ${selector}: ${error instanceof Error ? error.message : String(error)}`;
+                return `Error filling element at ${input.selector}: ${error instanceof Error ? error.message : String(error)}`;
             } finally
             {
                 await browserService.closeConnection();
             }
+        },
+        {
+            name: "fill",
+            description: "Fill an input field on the page using a CSS selector",
+            schema: fillSchema,
         }
-    });
+    );
 
     // Return tool collection
     return [gotoTool, clickTool, fillTool];

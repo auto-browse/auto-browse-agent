@@ -4,6 +4,7 @@ import { createBrowserTools } from "../tools/browser/browserTools";
 import { storageService } from "@/storage/services/storageService";
 import { Settings } from "@/storage/types/settings";
 import { LLMProviders } from "../types/providers";
+import { browserService } from "@/browser/services/browserService";
 
 export async function createAgent() {
     const response = await storageService.getData("settings");
@@ -31,8 +32,15 @@ export async function createAgent() {
 
     const browserTools = createBrowserTools();
     const llmWithTools = model.bindTools(browserTools, { parallel_tool_calls: false });
+    const accessibilitySnapshot = await browserService.getAccessibilitySnapshot();
+    const accessibilityData = accessibilitySnapshot.success ? accessibilitySnapshot.data.snapshot : 'No accessibility data available';
+    const customPrompt = `You are a helpful assistant that can browse the web. Use the accessibility snapshot to come up with a puppeteer selector which you can pass to call the required tools to complete the user requested action. Here Current page accessibility snapshot: ${JSON.stringify(accessibilityData)}`;
+
+    console.log(customPrompt);
+
     return await createReactAgent({
         llm: llmWithTools,
-        tools: browserTools
+        tools: browserTools,
+        prompt: customPrompt
     });
 }
