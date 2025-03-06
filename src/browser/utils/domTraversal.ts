@@ -383,10 +383,10 @@ export const domTraversalScript = `(() => {
                     if (nodeData.highlightIndex === focusHighlightIndex) {
                         nodeData.isTopElement = true;
                     }
-                    node.setAttribute(
-                        'browser-user-highlight-id',
-                        \`playwright-highlight-\${nodeData.highlightIndex}\`
-                    );
+                    const highlightId = \`playwright-highlight-\${nodeData.highlightIndex}\`;
+                    // Set both DOM attribute and add to our data structure
+                    node.setAttribute('browser-user-highlight-id', highlightId);
+                    nodeData.attributes['browser-user-highlight-id'] = highlightId;
                 }
 
                 return nodeData;
