@@ -7,7 +7,7 @@ class AgentService {
             messages: [new HumanMessage(message)]
         };
 
-        return await streamBrowserGraph(input);
+        return await streamBrowserGraph(input, { streamMode: "messages" });
     }
 }
 

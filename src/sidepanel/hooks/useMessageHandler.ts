@@ -2,7 +2,7 @@ import { useState } from "react";
 import { handleMessage } from "@/messaging/handlers/messageHandler";
 import { ActionType, MessageRequest, MessageResponse } from "@/messaging/types";
 import { agentService } from "@/llm/services/agentService";
-// import { StreamEvent } from "@langchain/core/tracers/log_stream";
+import { isAIMessageChunk } from "@langchain/core/messages";
 
 export const useMessageHandler = () => {
     const [message, setMessage] = useState<string>("");
@@ -16,19 +16,19 @@ export const useMessageHandler = () => {
             const stream = await agentService.processMessage(message);
             let fullResponse = "";
 
-            for await (const event of stream)
+            for await (const [message, _metadata] of stream)
             {
-                if ("data" in event && typeof event.data === "string")
+                if (isAIMessageChunk(message))
                 {
-                    const data = JSON.parse(event.data);
-                    if (data.messages && data.messages.length > 0)
+                    if (message.tool_call_chunks?.length)
                     {
-                        const lastMessage = data.messages[data.messages.length - 1];
-                        if (lastMessage?.content)
-                        {
-                            fullResponse = lastMessage.content;
-                            setMessage(fullResponse);
-                        }
+                        const chunk = message.tool_call_chunks[0];
+                        setMessage(prev => prev + `\n${message.getType()} MESSAGE TOOL CALL CHUNK: ${chunk.args}`);
+                    }
+                    else if (message.content)
+                    {
+                        fullResponse += String(message.content);
+                        setMessage(prev => prev + `\n${message.getType()} MESSAGE CONTENT: ${message.content}`);
                     }
                 }
             }
