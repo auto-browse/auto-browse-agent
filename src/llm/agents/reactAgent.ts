@@ -49,6 +49,6 @@ ${formattedMapString}`;
     return await createReactAgent({
         llm: llmWithTools,
         tools: browserTools,
-        prompt: customPrompt
+        stateModifier: customPrompt
     });
 }

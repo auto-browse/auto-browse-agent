@@ -1,8 +1,45 @@
 import { useState } from "react";
 import { handleMessage } from "@/messaging/handlers/messageHandler";
 import { ActionType, MessageRequest, MessageResponse } from "@/messaging/types";
-import { agentService } from "@/llm/services/agentService";
-import { isAIMessageChunk } from "@langchain/core/messages";
+import { processMessage } from "@/llm/graphs/browserGraph";
+import {
+    AIMessage,
+    BaseMessage,
+    AIMessageChunk,
+    ToolMessage,
+    MessageType
+} from "@langchain/core/messages";
+
+type ExtendedMessage = BaseMessage & {
+    _getType?: () => MessageType;
+    tool_call_chunks?: Array<{
+        name: string;
+        args: string;
+    }>;
+    name?: string;
+};
+
+interface GraphResponse {
+    messages: [
+        BaseMessage,
+        {
+            messages: ExtendedMessage[];
+        }
+    ];
+}
+
+// Type guard functions
+function hasToolCallChunks(msg: ExtendedMessage): msg is ExtendedMessage & { tool_call_chunks: Array<{ name: string; args: string; }>; } {
+    return Array.isArray((msg as any).tool_call_chunks) && (msg as any).tool_call_chunks.length > 0;
+}
+
+function hasAdditionalKwargsWithToolCalls(msg: AIMessage): boolean {
+    return (
+        'additional_kwargs' in msg &&
+        msg.additional_kwargs?.tool_calls !== undefined &&
+        msg.additional_kwargs.tool_calls.length > 0
+    );
+}
 
 export const useMessageHandler = () => {
     const [message, setMessage] = useState<string>("");
@@ -13,43 +50,72 @@ export const useMessageHandler = () => {
         setIsLoading(true);
         try
         {
-            const stream = await agentService.processMessage(message);
-            let fullResponse = "";
+            const response = await processMessage(message) as GraphResponse;
+            console.log("Response from processMessage:", response);
 
-            // Format timestamp
+            let output = "";
             const time = new Intl.DateTimeFormat('en-US', {
                 hour: "numeric",
                 minute: "2-digit",
                 hour12: true
             }).format(new Date());
 
-            // Start with timestamp
-            setMessage(`${time}`);
-
-            for await (const [message, _metadata] of stream)
+            // Process messages from the graph output
+            const messages = response.messages[1].messages;
+            for (const msg of messages)
             {
-                if (isAIMessageChunk(message))
+                console.log("Processing message:", msg);
+
+                if (msg instanceof AIMessageChunk)
                 {
-                    if (message.tool_call_chunks?.length)
+                    console.log("Processing AIMessageChunk:", msg);
+                    if (hasToolCallChunks(msg))
                     {
-                        const chunk = message.tool_call_chunks[0];
-                        setMessage(prev => `${prev}\n${message.getType()} MESSAGE TOOL CALL CHUNK: ${chunk.args}`);
-                    }
-                    else if (message.content)
+                        const chunk = msg.tool_call_chunks[0];
+                        output += `Tool Call: ${chunk.name}\n`;
+                        output += `Arguments: ${chunk.args}\n`;
+                    } else if (msg.content)
                     {
-                        fullResponse += String(message.content);
-                        setMessage(prev => `${prev}\n${message.getType()} MESSAGE CONTENT: ${message.content}`);
+                        output += `${msg.content}\n`;
                     }
+                }
+                else if (msg instanceof AIMessage)
+                {
+                    console.log("Processing AIMessage:", msg);
+                    if (msg.content)
+                    {
+                        output += `${msg.content}\n`;
+                    }
+                    if (hasAdditionalKwargsWithToolCalls(msg))
+                    {
+                        const toolCalls = msg.additional_kwargs.tool_calls;
+                        if (toolCalls && toolCalls.length > 0)
+                        {
+                            const tool = toolCalls[0];
+                            output += `Tool Call: ${tool.function.name}\n`;
+                            output += `Arguments: ${tool.function.arguments}\n`;
+                        }
+                    }
+                }
+                else if (msg instanceof ToolMessage)
+                {
+                    console.log("Processing ToolMessage:", msg);
+                    output += `Tool Response: ${msg.content}\n`;
+                }
+                else if ('content' in msg && msg.content)
+                {
+                    console.log("Processing other message type:", msg);
+                    output += `${msg.content}\n`;
                 }
             }
 
-            // Add timestamp at the end
-            setMessage(prev => `${prev}\n${time}`);
+            const finalOutput = output.trim();
+            setMessage(`${time}\n${finalOutput}\n${time}`);
 
             return {
                 success: true,
-                message: fullResponse
-            };
+                message: finalOutput
+            } as MessageResponse;
         } catch (error)
         {
             console.error("Error in chat:", error);
@@ -59,7 +125,7 @@ export const useMessageHandler = () => {
                 success: false,
                 message: errorMessage,
                 error: error instanceof Error ? error : new Error(errorMessage)
-            };
+            } as MessageResponse;
         } finally
         {
             setIsLoading(false);
@@ -88,7 +154,7 @@ export const useMessageHandler = () => {
                 success: false,
                 message: errorMessage,
                 error: error instanceof Error ? error : new Error(errorMessage)
-            };
+            } as MessageResponse;
         } finally
         {
             setIsLoading(false);
