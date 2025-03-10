@@ -14,19 +14,12 @@ export const BrowserGraphState = Annotation.Root({
         reducer: (x, y) => (y ?? x),
         default: () => "",
     }),
-    steps: Annotation<string[][]>({
+    pastSteps: Annotation<[string, string][]>({
         reducer: (x, y) => x.concat(y),
         default: () => [],
     }),
-    results: Annotation<Record<string, any>>({
-        reducer: (x, y) => ({ ...x, ...y }),
-        default: () => ({}),
-    }),
-    result: Annotation<string>({
+    reactresult: Annotation<string>({
         reducer: (x, y) => (y ?? x),
         default: () => "",
-    }),
-    pastSteps: Annotation<[string, string][]>({
-        reducer: (x, y) => x.concat(y),
     })
 });

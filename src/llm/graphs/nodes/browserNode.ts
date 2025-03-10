@@ -11,7 +11,11 @@ export const browserNode = async (state: typeof BrowserGraphState.State) => {
         }]
     });
     console.log("Agent result:", result);
+    // Get the planned next step from the AI's response
+    const reactresult = result.messages[result.messages.length - 1].content;
+
     return {
-        messages: result.messages
+        messages: result.messages,
+        reactresult: reactresult,
     };
 };

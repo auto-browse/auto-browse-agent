@@ -23,9 +23,8 @@ interface GraphResponse {
     messages: ExtendedMessage[];
     task: string;
     planString: string;
-    steps: string[][];
-    results: Record<string, any>;
-    result: string;
+    pastSteps: [string, string][];
+    reactresult: string;
 }
 
 // Type guard functions
