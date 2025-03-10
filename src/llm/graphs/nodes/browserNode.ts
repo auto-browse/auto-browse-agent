@@ -4,10 +4,7 @@ import { BrowserGraphState } from "../types/state";
 
 export const browserNode = async (state: typeof BrowserGraphState.State) => {
     const agent = await createAgent();
-    const messages = state.messages;
-    const lastMessage = messages[messages.length - 1];
-
-    if (!(lastMessage instanceof HumanMessage))
+    if (!(state.messages[0] instanceof HumanMessage))
     {
         throw new Error("Expected last message to be a human message");
     }
@@ -15,9 +12,14 @@ export const browserNode = async (state: typeof BrowserGraphState.State) => {
     const result = await agent.invoke({
         messages: [{
             role: "user",
-            content: lastMessage.content
+            content: state.messages[0].content
         }]
     });
     console.log("Agent result:", result);
-    return { messages: [result] };
+    return {
+        messages: [
+            state.messages[0],
+            { messages: result.messages }
+        ]
+    };
 };

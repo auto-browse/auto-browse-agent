@@ -13,6 +13,6 @@ export async function processMessage(message: string) {
     const compiledGraph = graph.compile({ name: "browser_graph" });
 
     return compiledGraph.invoke({
-        messages: [new HumanMessage(message)]
+        messages: [new HumanMessage(message), { messages: [] }]
     });
 }
