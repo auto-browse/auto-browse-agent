@@ -20,12 +20,12 @@ type ExtendedMessage = BaseMessage & {
 };
 
 interface GraphResponse {
-    messages: [
-        BaseMessage,
-        {
-            messages: ExtendedMessage[];
-        }
-    ];
+    messages: ExtendedMessage[];
+    task: string;
+    planString: string;
+    steps: string[][];
+    results: Record<string, any>;
+    result: string;
 }
 
 // Type guard functions
@@ -61,8 +61,7 @@ export const useMessageHandler = () => {
             }).format(new Date());
 
             // Process messages from the graph output
-            const messages = response.messages[1].messages;
-            for (const msg of messages)
+            for (const msg of response.messages)
             {
                 console.log("Processing message:", msg);
 

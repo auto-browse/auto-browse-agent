@@ -1,7 +1,7 @@
 import { START, END, StateGraph } from "@langchain/langgraph/web";
 import { browserNode } from "./nodes/browserNode";
 import { BrowserGraphState } from "./types/state";
-import { HumanMessage } from "@langchain/core/messages";
+//import { HumanMessage } from "@langchain/core/messages";
 
 export async function processMessage(message: string) {
     const graph = new StateGraph(BrowserGraphState)
@@ -13,6 +13,7 @@ export async function processMessage(message: string) {
     const compiledGraph = graph.compile({ name: "browser_graph" });
 
     return compiledGraph.invoke({
-        messages: [new HumanMessage(message), { messages: [] }]
+        task: message,
+        messages: []
     });
 }
