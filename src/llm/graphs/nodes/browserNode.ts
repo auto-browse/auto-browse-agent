@@ -7,7 +7,7 @@ export const browserNode = async (state: typeof BrowserGraphState.State) => {
     const result = await agent.invoke({
         messages: [{
             role: "user",
-            content: state.task
+            content: state.planString
         }]
     });
     console.log("Agent result:", result);

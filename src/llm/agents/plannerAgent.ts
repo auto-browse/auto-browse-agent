@@ -36,8 +36,13 @@ History: (Each line shows a past step and its result)
 {pastSteps}
 Last Result: {lastResult}
 
-Analyze this history and the current task to determine the next single step that should be taken.
-Be specific and clear about what needs to be done next. Consider what has been done so far and its outcomes.`;
+Analyze this history and the current task to determine what should be done next.
+
+If the task is complete (based on history and results), respond with exactly:
+"Task completed: <explanation why it's complete>"
+
+Otherwise, provide the next single step that should be taken to progress towards completing the task.
+Be specific and clear about what needs to be done next.`;
 
     return await createReactAgent({
         llm: model,
