@@ -104,6 +104,14 @@ class BrowserService {
             }
 
             await page.setRequestInterception(false); // Ensure no interference
+
+            // Get actual window dimensions
+            const window = await chrome.windows.get(tab.windowId);
+            await page.setViewport({
+                width: window.width || 800,
+                height: window.height || 600
+            });
+
             return { browser: browser as Browser, page: page as Page };
         } catch (connectError)
         {
