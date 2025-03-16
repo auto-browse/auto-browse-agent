@@ -13,7 +13,8 @@ import {
     Ghost,
     Target,
     Compass,
-    Link2
+    Link2,
+    LayoutTemplate
 } from "lucide-react";
 
 interface ActionButtonsProps {
@@ -106,6 +107,12 @@ const debugButtons: DebugButton[] = [
         label: "Get Current URL",
         icon: <Link2 className="h-4 w-4 mr-2" />,
         className: "bg-indigo-100 hover:bg-indigo-200 text-indigo-800 dark:bg-indigo-900 dark:hover:bg-indigo-800 dark:text-indigo-200"
+    },
+    {
+        action: ActionType.GET_VIEWPORT,
+        label: "Get Viewport",
+        icon: <LayoutTemplate className="h-4 w-4 mr-2" />,
+        className: "bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-200"
     }
 ];
 
