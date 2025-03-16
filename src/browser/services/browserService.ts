@@ -15,6 +15,7 @@ import { cookieService } from "./cookieService";
 import { shadowDomService } from "./shadowDomService";
 import { interactiveMapService } from "./interactiveMapService";
 import { xpathService } from "./xpathService";
+import { urlService } from "./urlService";
 
 /**
  * Service class for managing browser operations using Puppeteer
@@ -156,6 +157,10 @@ class BrowserService {
 
     async getElementXpaths() {
         return xpathService.getElementXpaths();
+    }
+
+    async getCurrentUrl() {
+        return urlService.getCurrentUrl();
     }
 }
 

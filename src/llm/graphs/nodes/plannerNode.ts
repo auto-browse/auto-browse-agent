@@ -8,6 +8,10 @@ export const plannerNode = async (state: typeof BrowserGraphState.State) => {
         .map(([step, result]) => `${step} - ${result}`)
         .join('\n');
 
+    console.log("Formatted past steps:", pastStepsFormatted);
+    console.log("Current task:", state.task);
+    console.log("Last result:", state.reactresult);
+
     const result = await agent.invoke({
         messages: [{
             role: "user",

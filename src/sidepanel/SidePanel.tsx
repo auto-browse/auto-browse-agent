@@ -1,8 +1,5 @@
 import React, { useState, useRef, useEffect, FormEvent } from "react";
-import {
-    Settings, Send, FileText, Link as LinkIcon, Code, Info,
-    Camera, Accessibility, GitFork, Cookie, Ghost, Target, Compass
-} from "lucide-react";
+import { Settings, Send } from "lucide-react";
 import { useMessageHandler } from "./hooks/useMessageHandler";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Toaster, toast } from "sonner";
 import { ActionType, ChatMessage } from "@/messaging/types";
+import { ActionButtons } from "./components/ActionButtons";
 
 interface SidePanelProps {
     onOpenOptions: () => void;
@@ -169,104 +167,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                                 Debug Commands
                             </Badge>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                            <Button
-                                size="sm"
-                                className="bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900 dark:hover:bg-blue-800 dark:text-blue-200"
-                                onClick={() => handleDebugCommand(ActionType.GET_PAGE_TITLE)}
-                            >
-                                <FileText className="h-4 w-4 mr-2" />
-                                Get Page Title
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-purple-100 hover:bg-purple-200 text-purple-800 dark:bg-purple-900 dark:hover:bg-purple-800 dark:text-purple-200"
-                                onClick={() => handleDebugCommand(ActionType.HIGHLIGHT_LINKS)}
-                            >
-                                <LinkIcon className="h-4 w-4 mr-2" />
-                                Highlight Links
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 dark:bg-emerald-900 dark:hover:bg-emerald-800 dark:text-emerald-200"
-                                onClick={() => handleDebugCommand(ActionType.COUNT_ELEMENTS)}
-                            >
-                                <Code className="h-4 w-4 mr-2" />
-                                Count Elements
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-amber-100 hover:bg-amber-200 text-amber-800 dark:bg-amber-900 dark:hover:bg-amber-800 dark:text-amber-200"
-                                onClick={() => handleDebugCommand(ActionType.GET_METADATA)}
-                            >
-                                <Info className="h-4 w-4 mr-2" />
-                                Get Metadata
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-rose-100 hover:bg-rose-200 text-rose-800 dark:bg-rose-900 dark:hover:bg-rose-800 dark:text-rose-200"
-                                onClick={() => handleDebugCommand(ActionType.TAKE_SCREENSHOT)}
-                            >
-                                <Camera className="h-4 w-4 mr-2" />
-                                Take Screenshot
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-violet-100 hover:bg-violet-200 text-violet-800 dark:bg-violet-900 dark:hover:bg-violet-800 dark:text-violet-200"
-                                onClick={() => handleDebugCommand(ActionType.GET_ACCESSIBILITY_SNAPSHOT)}
-                            >
-                                <Accessibility className="h-4 w-4 mr-2" />
-                                A11y Snapshot
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-green-100 hover:bg-green-200 text-green-800 dark:bg-green-900 dark:hover:bg-green-800 dark:text-green-200"
-                                onClick={() => handleDebugCommand(ActionType.GET_DOM_TREE)}
-                            >
-                                <GitFork className="h-4 w-4 mr-2" />
-                                DOM Tree
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-orange-100 hover:bg-orange-200 text-orange-800 dark:bg-orange-900 dark:hover:bg-orange-800 dark:text-orange-200"
-                                onClick={() => handleDebugCommand(ActionType.ANALYZE_COOKIE_BANNERS)}
-                            >
-                                <Cookie className="h-4 w-4 mr-2" />
-                                Cookie UI
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-purple-100 hover:bg-purple-200 text-purple-800 dark:bg-purple-900 dark:hover:bg-purple-800 dark:text-purple-200"
-                                onClick={() => handleDebugCommand(ActionType.EXPLORE_SHADOW_DOM)}
-                            >
-                                <Ghost className="h-4 w-4 mr-2" />
-                                Shadow DOM
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-pink-100 hover:bg-pink-200 text-pink-800 dark:bg-pink-900 dark:hover:bg-pink-800 dark:text-pink-200"
-                                onClick={() => handleDebugCommand(ActionType.GET_INTERACTIVE_MAP)}
-                            >
-                                <Target className="h-4 w-4 mr-2" />
-                                Interactive Map
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-cyan-100 hover:bg-cyan-200 text-cyan-800 dark:bg-cyan-900 dark:hover:bg-cyan-800 dark:text-cyan-200"
-                                onClick={() => handleDebugCommand(ActionType.GET_FORMATTED_INTERACTIVE_MAP)}
-                            >
-                                <Target className="h-4 w-4 mr-2" />
-                                Formatted Interactive Map
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-teal-100 hover:bg-teal-200 text-teal-800 dark:bg-teal-900 dark:hover:bg-teal-800 dark:text-teal-200"
-                                onClick={() => handleDebugCommand(ActionType.GET_ELEMENT_XPATHS)}
-                            >
-                                <Compass className="h-4 w-4 mr-2" />
-                                XPath Map
-                            </Button>
-                        </div>
+                        <ActionButtons onAction={handleDebugCommand} isLoading={false} />
                     </div>
                     <Separator />
                 </>

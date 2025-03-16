@@ -133,6 +133,16 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
+            case ActionType.GET_CURRENT_URL: {
+                const response = await browserService.getCurrentUrl();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
             case ActionType.TAKE_SCREENSHOT: {
                 const response = await browserService.takeScreenshot();
                 return {

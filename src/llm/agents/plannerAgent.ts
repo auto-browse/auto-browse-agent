@@ -44,6 +44,7 @@ If the task is complete (based on history and results), respond with exactly:
 Otherwise, provide the next single step that should be taken to progress towards completing the task.
 Be specific and clear about what needs to be done next.`;
 
+    console.log(plannerPrompt);
     return await createReactAgent({
         llm: model,
         tools: [],
