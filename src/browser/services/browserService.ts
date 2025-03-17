@@ -17,6 +17,7 @@ import { interactiveMapService } from "./interactiveMapService";
 import { xpathService } from "./xpathService";
 import { urlService } from "./urlService";
 import { viewportService } from "./viewportService";
+import { browserStateService } from "./browserStateService";
 
 /**
  * Service class for managing browser operations using Puppeteer
@@ -174,6 +175,10 @@ class BrowserService {
 
     async getViewportState() {
         return viewportService.getViewportState();
+    }
+
+    async getBrowserState() {
+        return browserStateService.getBrowserState();
     }
 }
 

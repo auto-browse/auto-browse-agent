@@ -14,7 +14,8 @@ import {
     Target,
     Compass,
     Link2,
-    LayoutTemplate
+    LayoutTemplate,
+    Activity
 } from "lucide-react";
 
 interface ActionButtonsProps {
@@ -113,6 +114,12 @@ const debugButtons: DebugButton[] = [
         label: "Get Viewport",
         icon: <LayoutTemplate className="h-4 w-4 mr-2" />,
         className: "bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-200"
+    },
+    {
+        action: ActionType.GET_BROWSER_STATE,
+        label: "Browser State",
+        icon: <Activity className="h-4 w-4 mr-2" />,
+        className: "bg-fuchsia-100 hover:bg-fuchsia-200 text-fuchsia-800 dark:bg-fuchsia-900 dark:hover:bg-fuchsia-800 dark:text-fuchsia-200"
     }
 ];
 
