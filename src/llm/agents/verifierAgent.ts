@@ -1,7 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { storageService } from "@/storage/services/storageService";
-import { browserService } from "@/browser/services/browserService";
+import { browserStateService } from "@/browser/services/browserStateService";
 import { Settings } from "@/storage/types/settings";
 import { LLMProviders } from "../types/providers";
 
@@ -29,14 +29,8 @@ export async function createVerifierAgent() {
         streaming: true
     });
 
-    const accessibilitySnapshot = await browserService.getAccessibilitySnapshot();
-    const accessibilityData = accessibilitySnapshot.success ? accessibilitySnapshot.data.snapshot : 'No accessibility data available';
-    const formattedMap = await browserService.getFormattedInteractiveMap();
-    const formattedMapData = formattedMap.success ? formattedMap.data.elements : 'No formatted map data available';
-
-    const formattedMapString = Array.isArray(formattedMapData)
-        ? formattedMapData.map(element => element.formattedOutput).join('\n')
-        : 'No formatted map data available';
+    const browserState = await browserStateService.getBrowserState();
+    const stateMessage = browserState.success ? browserState.message : 'Failed to get browser state';
 
     const verifierPrompt = `You are a plan execution verifier. Your job is to analyze if a planned action was successfully executed based on the current page state.
 
@@ -44,9 +38,7 @@ Planned Action: {planString}
 Action Result: {reactresult}
 
 Current Page State:
-Accessibility Snapshot: ${JSON.stringify(accessibilityData)}
-Formatted Interactive Map:
-${formattedMapString}
+${stateMessage}
 
 Analyze the plan, its result, and the current page state to determine if the action was successfully completed.
 If successful, explain what indicates success.

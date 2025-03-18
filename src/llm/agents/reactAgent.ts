@@ -4,7 +4,7 @@ import { createBrowserTools } from "../tools/browser/browserTools";
 import { storageService } from "@/storage/services/storageService";
 import { Settings } from "@/storage/types/settings";
 import { LLMProviders } from "../types/providers";
-import { browserService } from "@/browser/services/browserService";
+import { browserStateService } from "@/browser/services/browserStateService";
 
 export async function createAgent() {
     const response = await storageService.getData("settings");
@@ -32,17 +32,13 @@ export async function createAgent() {
 
     const browserTools = createBrowserTools();
     const llmWithTools = model.bindTools(browserTools, { parallel_tool_calls: false });
-    const accessibilitySnapshot = await browserService.getAccessibilitySnapshot();
-    const accessibilityData = accessibilitySnapshot.success ? accessibilitySnapshot.data.snapshot : 'No accessibility data available';
-    const formattedMap = await browserService.getFormattedInteractiveMap();
-    const formattedMapData = formattedMap.success ? formattedMap.data.elements : 'No formatted map data available';
+    const browserState = await browserStateService.getBrowserState();
+    const stateMessage = browserState.success ? browserState.message : 'Failed to get browser state';
 
-    const formattedMapString = Array.isArray(formattedMapData)
-        ? formattedMapData.map(element => element.formattedOutput).join('\n')
-        : 'No formatted map data available';
+    const customPrompt = `You are a helpful assistant that can browse the web. Use the provided browser state information to come up with a puppeteer selector which you can pass to call the required tools to complete the user requested action.
 
-    const customPrompt = `You are a helpful assistant that can browse the web. Use the accessibility snapshot and formatted interactive map to come up with a puppeteer selector which you can pass to call the required tools to complete the user requested action. Here Current page accessibility snapshot: ${JSON.stringify(accessibilityData)}. Current page formatted interactive map:
-${formattedMapString}`;
+Current Browser State:
+${stateMessage}`;
 
     console.log(customPrompt);
 
