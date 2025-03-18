@@ -1,6 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { storageService } from "@/storage/services/storageService";
+import { browserStateService } from "@/browser/services/browserStateService";
 import { Settings } from "@/storage/types/settings";
 import { LLMProviders } from "../types/providers";
 
@@ -28,6 +29,9 @@ export async function createPlannerAgent() {
         streaming: true
     });
 
+    const browserState = await browserStateService.getBrowserState();
+    const stateMessage = browserState.success ? browserState.message : 'Failed to get browser state';
+
     const plannerPrompt = `You are a task planner that generates the next step based on the current state.
 
 Given:
@@ -35,6 +39,9 @@ Task: {task}
 History: (Each line shows a past step and its result)
 {pastSteps}
 Last Result: {lastResult}
+
+Current Browser State:
+${stateMessage}
 
 Analyze this history and the current task to determine what should be done next.
 
