@@ -383,17 +383,17 @@ export const domTraversalScript = `(() => {
                     if (nodeData.highlightIndex === focusHighlightIndex) {
                         nodeData.isTopElement = true;
                     }
-                    const highlightId = \`playwright-highlight-\${nodeData.highlightIndex}\`;
+                    const highlightId = \`autobrowse-highlight-\${nodeData.highlightIndex}\`;
                     // Set both DOM attribute and add to our data structure
-                    node.setAttribute('browser-user-highlight-id', highlightId);
-                    nodeData.attributes['browser-user-highlight-id'] = highlightId;
+                    node.setAttribute('autobrowse-highlight-id', highlightId);
+                    nodeData.attributes['autobrowse-highlight-id'] = highlightId;
                 }
 
                 return nodeData;
             },
 
             captureState(options = {}) {
-                const existingContainer = document.getElementById('playwright-highlight-container');
+                const existingContainer = document.getElementById('autobrowse-highlight-container');
                 if (existingContainer) {
                     existingContainer.remove();
                 }

@@ -3,7 +3,7 @@ import { browserService } from "./browserService";
 import { domTraversalScript } from "../utils/domTraversal";
 
 const INTERACTIVE_ELEMENT_ATTRIBUTES = [
-    'browser-user-highlight-id',
+    'autobrowse-highlight-id',
     'title',
     'type',
     'name',

@@ -71,7 +71,13 @@ ${state.title}
 
 ## Interactive Elements (${state.interactiveMap.length})
 
-${state.interactiveMap.map(element => element.formattedOutput).join('\n\n')}
+${state.interactiveMap.length === 0 ? 'empty page' : `${state.viewport.pixelsAbove > 0
+                            ? `... ${state.viewport.pixelsAbove} pixels above - scroll or extract content to see more ...\n`
+                            : '[Start of page]\n'
+                        }${state.interactiveMap.map(element => element.formattedOutput).join('\n\n')}${state.viewport.pixelsBelow > 0
+                            ? `\n... ${state.viewport.pixelsBelow} pixels below - scroll or extract content to see more ...`
+                            : '\n[End of page]'
+                        }`}
 
 
 ## Accessibility Tree
