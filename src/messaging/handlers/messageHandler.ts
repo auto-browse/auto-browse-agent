@@ -83,6 +83,26 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
+            case ActionType.GET_DOM_TREE_WITH_BUILD: {
+                const response = await browserService.getDomTreeWithBuild();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
+            case ActionType.GET_DOM_TREE_WITH_PAGE_SCRIPT: {
+                const response = await browserService.getDomTreeWithPageScript();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
             case ActionType.ANALYZE_COOKIE_BANNERS: {
                 const response = await browserService.analyzeCookieBanners();
                 return {

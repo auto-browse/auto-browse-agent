@@ -149,6 +149,14 @@ class BrowserService {
         return domService.getDomTree();
     }
 
+    async getDomTreeWithBuild() {
+        return domService.getDomTreeWithBuildDomTree();
+    }
+
+    async getDomTreeWithPageScript() {
+        return domService.getDomTreeWithPageScript();
+    }
+
     async analyzeCookieBanners() {
         return cookieService.analyzeCookieBanners();
     }

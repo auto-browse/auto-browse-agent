@@ -69,9 +69,21 @@ const debugButtons: DebugButton[] = [
     },
     {
         action: ActionType.GET_DOM_TREE,
-        label: "DOM Tree",
+        label: "DOM Tree (Original)",
         icon: <GitFork className="h-4 w-4 mr-2" />,
         className: "bg-green-100 hover:bg-green-200 text-green-800 dark:bg-green-900 dark:hover:bg-green-800 dark:text-green-200"
+    },
+    {
+        action: ActionType.GET_DOM_TREE_WITH_BUILD,
+        label: "DOM Tree (Cached)",
+        icon: <GitFork className="h-4 w-4 mr-2" />,
+        className: "bg-lime-100 hover:bg-lime-200 text-lime-800 dark:bg-lime-900 dark:hover:bg-lime-800 dark:text-lime-200"
+    },
+    {
+        action: ActionType.GET_DOM_TREE_WITH_PAGE_SCRIPT,
+        label: "DOM Tree (Page Script)",
+        icon: <GitFork className="h-4 w-4 mr-2" />,
+        className: "bg-emerald-100 hover:bg-emerald-200 text-emerald-800 dark:bg-emerald-900 dark:hover:bg-emerald-800 dark:text-emerald-200"
     },
     {
         action: ActionType.ANALYZE_COOKIE_BANNERS,
