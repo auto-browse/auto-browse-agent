@@ -188,6 +188,10 @@ class BrowserService {
     async getBrowserState() {
         return browserStateService.getBrowserState();
     }
+
+    async getClickableElements() {
+        return domService.getClickableElements();
+    }
 }
 
 export const browserService = new BrowserService();

@@ -86,6 +86,12 @@ const debugButtons: DebugButton[] = [
         className: "bg-emerald-100 hover:bg-emerald-200 text-emerald-800 dark:bg-emerald-900 dark:hover:bg-emerald-800 dark:text-emerald-200"
     },
     {
+        action: ActionType.GET_CLICKABLE_ELEMENTS,
+        label: "Clickable Elements",
+        icon: <Target className="h-4 w-4 mr-2" />,
+        className: "bg-sky-100 hover:bg-sky-200 text-sky-800 dark:bg-sky-900 dark:hover:bg-sky-800 dark:text-sky-200"
+    },
+    {
         action: ActionType.ANALYZE_COOKIE_BANNERS,
         label: "Cookie UI",
         icon: <Cookie className="h-4 w-4 mr-2" />,

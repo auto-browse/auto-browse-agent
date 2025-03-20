@@ -995,28 +995,28 @@ const args = {
 
 		// if (isInteractiveCandidate(node)) {
 
-		// Check interactivity
-		if (node.nodeType === Node.ELEMENT_NODE) {
-			nodeData.isVisible = isElementVisible(node);
-			if (nodeData.isVisible) {
-				nodeData.isTopElement = isTopElement(node);
-				if (nodeData.isTopElement) {
-					nodeData.isInteractive = isInteractiveElement(node);
-					if (nodeData.isInteractive) {
-						nodeData.isInViewport = true;
-						nodeData.highlightIndex = highlightIndex++;
+			// Check interactivity
+			if (node.nodeType === Node.ELEMENT_NODE) {
+				nodeData.isVisible = isElementVisible(node);
+				if (nodeData.isVisible) {
+					nodeData.isTopElement = isTopElement(node);
+					// if (nodeData.isTopElement) {
+						nodeData.isInteractive = isInteractiveElement(node);
+						if (nodeData.isInteractive) {
+							nodeData.isInViewport = true;
+							nodeData.highlightIndex = highlightIndex++;
 
-						if (doHighlightElements) {
-							if (focusHighlightIndex >= 0) {
-								if (focusHighlightIndex === nodeData.highlightIndex) {
+							if (doHighlightElements) {
+								if (focusHighlightIndex >= 0) {
+									if (focusHighlightIndex === nodeData.highlightIndex) {
+										highlightElement(node, nodeData.highlightIndex, parentIframe);
+									}
+								} else {
 									highlightElement(node, nodeData.highlightIndex, parentIframe);
 								}
-							} else {
-								highlightElement(node, nodeData.highlightIndex, parentIframe);
 							}
 						}
-					}
-				}
+					// }
 			}
 		}
 
