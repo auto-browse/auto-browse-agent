@@ -183,6 +183,26 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
+            case ActionType.GET_ELEMENT_TREE: {
+                const response = await browserService.getElementTree();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
+            case ActionType.GET_SELECTOR_MAP: {
+                const response = await browserService.getSelectorMap();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
             case ActionType.GET_CURRENT_URL: {
                 const response = await browserService.getCurrentUrl();
                 return {

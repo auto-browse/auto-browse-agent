@@ -105,8 +105,15 @@ class DomService {
             const { page } = await browserService.getOrCreateConnection();
             const rawTree = await page.evaluate(buildDomTreeScript);
 
-            // Process the raw tree to create a hierarchical DOM structure
-            const domState = this.processClickableElements(rawTree);
+            // Process the raw tree to create both hierarchical DOM structure and selector map
+            const elementTree = this.processElementTree(rawTree);
+            const selectorMap = this.processSelectorMap(rawTree, elementTree);
+
+            // Build the complete DOM state
+            const domState: DOMState = {
+                element_tree: elementTree,
+                selector_map: selectorMap
+            };
 
             // Prepare a serializable version of the DOM state to avoid circular references
             const serializableDomState = this.makeSerializable(domState);
@@ -117,6 +124,81 @@ class DomService {
                 data: {
                     timestamp: new Date().toISOString(),
                     tree: serializableDomState
+                }
+            };
+        } catch (error)
+        {
+            return {
+                success: false,
+                message: error instanceof Error ? error.message : String(error),
+                error: error instanceof Error ? error : new Error(String(error))
+            };
+        }
+    }
+
+    /**
+     * Get just the DOM element tree without selector information
+     * @returns {Promise<BrowserServiceResponse>} Response with DOM element tree
+     */
+    async getElementTree(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { page } = await browserService.getOrCreateConnection();
+            const rawTree = await page.evaluate(buildDomTreeScript);
+
+            // Process just the element tree
+            const elementTree = this.processElementTree(rawTree);
+
+            // Serialize the element tree for response
+            const serializableTree = this.serializeElement(elementTree);
+
+            return {
+                success: true,
+                message: "DOM Element Tree",
+                data: {
+                    timestamp: new Date().toISOString(),
+                    elementTree: serializableTree
+                }
+            };
+        } catch (error)
+        {
+            return {
+                success: false,
+                message: error instanceof Error ? error.message : String(error),
+                error: error instanceof Error ? error : new Error(String(error))
+            };
+        }
+    }
+
+    /**
+     * Get just the selector map of interactive elements
+     * @returns {Promise<BrowserServiceResponse>} Response with selector map
+     */
+    async getSelectorMap(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { page } = await browserService.getOrCreateConnection();
+            const rawTree = await page.evaluate(buildDomTreeScript);
+
+            // First need to process the element tree for parent-child relationships
+            const elementTree = this.processElementTree(rawTree);
+
+            // Then extract only the selector map
+            const selectorMap = this.processSelectorMap(rawTree, elementTree);
+
+            // Create a serializable version of the selector map
+            const serializableMap: Record<number, any> = {};
+            for (const [key, element] of Object.entries(selectorMap))
+            {
+                serializableMap[Number(key)] = this.serializeElement(element as DOMElementNode);
+            }
+
+            return {
+                success: true,
+                message: "Interactive Elements Selector Map",
+                data: {
+                    timestamp: new Date().toISOString(),
+                    selectorMap: serializableMap
                 }
             };
         } catch (error)
@@ -204,7 +286,12 @@ class DomService {
         return serializableNode;
     }
 
-    private processClickableElements(rawTree: any): DOMState {
+    /**
+     * Process the raw DOM tree data to create a hierarchical element tree
+     * @param rawTree The raw DOM tree data from the browser
+     * @returns The processed DOM element tree
+     */
+    private processElementTree(rawTree: any): DOMElementNode {
         const { rootId, map } = rawTree;
         if (!rootId || !map)
         {
@@ -212,7 +299,6 @@ class DomService {
         }
 
         const node_map: { [key: string]: DOMElementNode | DOMTextNode; } = {};
-        const selector_map: { [key: number]: DOMElementNode; } = {};
 
         // First pass: create all nodes
         for (const [id, nodeData] of Object.entries(map))
@@ -221,12 +307,6 @@ class DomService {
             if (node)
             {
                 node_map[id] = node;
-
-                // Add to selector map if it has a highlight index
-                if ('highlight_index' in node && node.highlight_index !== undefined)
-                {
-                    selector_map[node.highlight_index] = node as DOMElementNode;
-                }
             }
         }
 
@@ -258,10 +338,53 @@ class DomService {
             throw new Error('Failed to process DOM tree: no valid root node found');
         }
 
-        return {
-            element_tree: rootNode as DOMElementNode,
-            selector_map: selector_map
+        return rootNode as DOMElementNode;
+    }
+
+    /**
+     * Process the raw DOM tree data to create a selector map of interactive elements
+     * @param rawTree The raw DOM tree data from the browser
+     * @param elementTree The already processed element tree (for efficiency)
+     * @returns The selector map of interactive elements
+     */
+    private processSelectorMap(rawTree: any, elementTree: DOMElementNode): { [key: number]: DOMElementNode; } {
+        const { map } = rawTree;
+        if (!map)
+        {
+            throw new Error('Invalid DOM tree structure');
+        }
+
+        const selector_map: { [key: number]: DOMElementNode; } = {};
+
+        // Simple helper function to find nodes with highlight indexes
+        const findHighlightedNodes = (node: DOMElementNode | DOMTextNode) => {
+            if ('type' in node && node.type === 'TEXT_NODE')
+            {
+                return; // Skip text nodes
+            }
+
+            const elementNode = node as DOMElementNode;
+
+            // Add to selector map if the node has a highlight index
+            if (elementNode.highlight_index !== undefined)
+            {
+                selector_map[elementNode.highlight_index] = elementNode;
+            }
+
+            // Recursively process children
+            if (elementNode.children)
+            {
+                for (const child of elementNode.children)
+                {
+                    findHighlightedNodes(child);
+                }
+            }
         };
+
+        // Start the recursive search
+        findHighlightedNodes(elementTree);
+
+        return selector_map;
     }
 
     private parseNode(nodeData: any): DOMElementNode | DOMTextNode | null {

@@ -15,7 +15,9 @@ import {
     Compass,
     Link2,
     LayoutTemplate,
-    Activity
+    Activity,
+    GitBranch,
+    Map as MapIcon
 } from "lucide-react";
 
 interface ActionButtonsProps {
@@ -87,9 +89,21 @@ const debugButtons: DebugButton[] = [
     },
     {
         action: ActionType.GET_CLICKABLE_ELEMENTS,
-        label: "Clickable Elements",
+        label: "All Clickable Elements",
         icon: <Target className="h-4 w-4 mr-2" />,
         className: "bg-sky-100 hover:bg-sky-200 text-sky-800 dark:bg-sky-900 dark:hover:bg-sky-800 dark:text-sky-200"
+    },
+    {
+        action: ActionType.GET_ELEMENT_TREE,
+        label: "Element Tree",
+        icon: <GitBranch className="h-4 w-4 mr-2" />,
+        className: "bg-lime-100 hover:bg-lime-200 text-lime-800 dark:bg-lime-900 dark:hover:bg-lime-800 dark:text-lime-200"
+    },
+    {
+        action: ActionType.GET_SELECTOR_MAP,
+        label: "Selector Map",
+        icon: <MapIcon className="h-4 w-4 mr-2" />,
+        className: "bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900 dark:hover:bg-blue-800 dark:text-blue-200"
     },
     {
         action: ActionType.ANALYZE_COOKIE_BANNERS,

@@ -192,6 +192,14 @@ class BrowserService {
     async getClickableElements() {
         return domService.getClickableElements();
     }
+
+    async getElementTree() {
+        return domService.getElementTree();
+    }
+
+    async getSelectorMap() {
+        return domService.getSelectorMap();
+    }
 }
 
 export const browserService = new BrowserService();

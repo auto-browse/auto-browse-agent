@@ -212,6 +212,22 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                                         </pre>
                                     </div>
                                 )}
+                                {/* Element tree display */}
+                                {message.response?.data?.elementTree && (
+                                    <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
+                                        <pre className="text-xs whitespace-pre-wrap">
+                                            {JSON.stringify(message.response.data.elementTree, null, 2)}
+                                        </pre>
+                                    </div>
+                                )}
+                                {/* Selector map display */}
+                                {message.response?.data?.selectorMap && (
+                                    <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
+                                        <pre className="text-xs whitespace-pre-wrap">
+                                            {JSON.stringify(message.response.data.selectorMap, null, 2)}
+                                        </pre>
+                                    </div>
+                                )}
                                 {/* Cookie banners and Interactive Map display */}
                                 {message.response?.data?.elements && (
                                     <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
