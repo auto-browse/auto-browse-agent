@@ -228,6 +228,14 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
                                         </pre>
                                     </div>
                                 )}
+                                {/* Text map display */}
+                                {message.response?.data?.textMap && (
+                                    <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
+                                        <pre className="text-xs whitespace-pre-wrap">
+                                            {JSON.stringify(message.response.data.textMap, null, 2)}
+                                        </pre>
+                                    </div>
+                                )}
                                 {/* Cookie banners and Interactive Map display */}
                                 {message.response?.data?.elements && (
                                     <div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">

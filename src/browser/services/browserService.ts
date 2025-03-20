@@ -200,6 +200,10 @@ class BrowserService {
     async getSelectorMap() {
         return domService.getSelectorMap();
     }
+
+    async getTextMap() {
+        return domService.getTextMap();
+    }
 }
 
 export const browserService = new BrowserService();

@@ -203,6 +203,16 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
+            case ActionType.GET_TEXT_MAP: {
+                const response = await browserService.getTextMap();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
             case ActionType.GET_CURRENT_URL: {
                 const response = await browserService.getCurrentUrl();
                 return {

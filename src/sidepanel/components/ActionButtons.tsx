@@ -17,7 +17,8 @@ import {
     LayoutTemplate,
     Activity,
     GitBranch,
-    Map as MapIcon
+    Map as MapIcon,
+    Type
 } from "lucide-react";
 
 interface ActionButtonsProps {
@@ -104,6 +105,12 @@ const debugButtons: DebugButton[] = [
         label: "Selector Map",
         icon: <MapIcon className="h-4 w-4 mr-2" />,
         className: "bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900 dark:hover:bg-blue-800 dark:text-blue-200"
+    },
+    {
+        action: ActionType.GET_TEXT_MAP,
+        label: "Text Node Map",
+        icon: <Type className="h-4 w-4 mr-2" />,
+        className: "bg-purple-100 hover:bg-purple-200 text-purple-800 dark:bg-purple-900 dark:hover:bg-purple-800 dark:text-purple-200"
     },
     {
         action: ActionType.ANALYZE_COOKIE_BANNERS,

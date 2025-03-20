@@ -212,6 +212,54 @@ class DomService {
     }
 
     /**
+     * Get just the text nodes map
+     * @returns {Promise<BrowserServiceResponse>} Response with text nodes map
+     */
+    async getTextMap(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { page } = await browserService.getOrCreateConnection();
+            const rawTree = await page.evaluate(buildDomTreeScript);
+
+            // First need to process the element tree for parent-child relationships
+            const elementTree = this.processElementTree(rawTree);
+
+            // Then extract text nodes
+            const textMap = this.processTextMap(elementTree);
+
+            // Create a serializable version of the text map
+            const serializableMap: Record<number, any> = {};
+            let index = 0;
+
+            for (const textNode of textMap)
+            {
+                // Only include visible text nodes with non-empty text
+                if (textNode.is_visible && textNode.text.trim())
+                {
+                    const serializedNode = this.serializeTextNode(textNode);
+                    serializableMap[index++] = serializedNode;
+                }
+            }
+
+            return {
+                success: true,
+                message: "Text Nodes Map",
+                data: {
+                    timestamp: new Date().toISOString(),
+                    textMap: serializableMap
+                }
+            };
+        } catch (error)
+        {
+            return {
+                success: false,
+                message: error instanceof Error ? error.message : String(error),
+                error: error instanceof Error ? error : new Error(String(error))
+            };
+        }
+    }
+
+    /**
      * Converts the DOM state to a serializable format by removing circular references
      * @param domState The DOM state to serialize
      * @returns A serializable version of the DOM state
@@ -385,6 +433,85 @@ class DomService {
         findHighlightedNodes(elementTree);
 
         return selector_map;
+    }
+
+    /**
+     * Process the DOM tree to extract text nodes
+     * @param elementTree The processed element tree
+     * @returns Array of text nodes with their parent information
+     */
+    private processTextMap(elementTree: DOMElementNode): Array<DOMTextNode & { parent_info: Record<string, any> | null; }> {
+        // First define the interface for the extended DOMTextNode
+        interface TextNodeWithParent extends DOMTextNode {
+            parent_info: Record<string, any> | null;
+        }
+
+        const textNodes: TextNodeWithParent[] = [];
+
+        // Helper function to recursively extract text nodes
+        const extractTextNodes = (node: DOMElementNode | DOMTextNode) => {
+            if ('type' in node && node.type === 'TEXT_NODE')
+            {
+                // Create a copy of the text node as TextNodeWithParent type
+                const textNodeWithParent: TextNodeWithParent = {
+                    ...node,
+                    parent_info: null, // Initialize with null
+                };
+
+                // If there's a parent, add its information
+                if (node.parent)
+                {
+                    // Now add the parent_info property
+                    textNodeWithParent.parent_info = {
+                        tag_name: node.parent.tag_name,
+                        xpath: node.parent.xpath,
+                        attributes: node.parent.attributes,
+                        is_visible: node.parent.is_visible,
+                        is_interactive: node.parent.is_interactive,
+                        is_top_element: node.parent.is_top_element,
+                        is_in_viewport: node.parent.is_in_viewport,
+                    };
+                }
+
+                textNodes.push(textNodeWithParent);
+                return;
+            }
+
+            // Process children for element nodes
+            if ('children' in node)
+            {
+                for (const child of node.children)
+                {
+                    extractTextNodes(child);
+                }
+            }
+        };
+
+        // Start the extraction from the root element
+        extractTextNodes(elementTree);
+
+        return textNodes;
+    }
+
+    /**
+     * Serialize a text node with its parent info, removing circular references
+     * @param node Text node to serialize
+     * @returns Serialized version of the text node
+     */
+    private serializeTextNode(node: DOMTextNode & { parent_info: Record<string, any> | null; }): any {
+        const serialized: any = {
+            type: node.type,
+            text: node.text,
+            is_visible: node.is_visible,
+        };
+
+        // Include parent info if available
+        if (node.parent_info)
+        {
+            serialized.parent_info = node.parent_info;
+        }
+
+        return serialized;
     }
 
     private parseNode(nodeData: any): DOMElementNode | DOMTextNode | null {
