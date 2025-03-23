@@ -224,6 +224,91 @@ export const pageScriptDomTreeScript = `(() => {
       }
     };
 
+    let getXPath = function(element) {
+      if (!element) return '';
+
+      // If element has an ID, use that for a shorter, more reliable XPath
+      if (element.id) {
+        return '//*[@id="' + element.id + '"]';
+      }
+
+      // Generate full path
+      const paths = [];
+      while (element && element.nodeType === Node.ELEMENT_NODE) {
+        let index = 0;
+        let sibling = element;
+        while (sibling) {
+          if (sibling.nodeType === Node.ELEMENT_NODE && sibling.tagName === element.tagName) {
+            index++;
+          }
+          sibling = sibling.previousSibling;
+        }
+        const tagName = element.tagName.toLowerCase();
+        const pathIndex = (index > 1) ? '[' + index + ']' : '';
+        paths.unshift(tagName + pathIndex);
+        element = element.parentNode;
+      }
+      return '/' + paths.join('/');
+    };
+
+    let getImportantAttributes = function(element) {
+      const result = {};
+      const attributesToCapture = ['id', 'name', 'class', 'href', 'value', 'type', 'placeholder', 'for', 'src', 'alt', 'title'];
+
+      // Add standard attributes
+      for (const attr of attributesToCapture) {
+        if (element.hasAttribute(attr)) {
+          result[attr] = element.getAttribute(attr);
+        }
+      }
+
+      // Add data-* attributes that are often used for testing
+      for (const attr of element.getAttributeNames()) {
+        if (attr.startsWith('data-')) {
+          result[attr] = element.getAttribute(attr);
+        }
+      }
+
+      return result;
+    };
+
+    let isElementVisible = function(element) {
+      const style = window.getComputedStyle(element);
+      return !(style.display === 'none' ||
+               style.visibility === 'hidden' ||
+               style.opacity === '0' ||
+               element.offsetWidth <= 0 ||
+               element.offsetHeight <= 0);
+    };
+
+    let isElementInViewport = function(element) {
+      const rect = element.getBoundingClientRect();
+      return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+      );
+    };
+
+    let isElementInteractive = function(element) {
+      // Check if element is disabled
+      if (element.hasAttribute('disabled') || element.getAttribute('aria-disabled') === 'true') {
+        return false;
+      }
+
+      // Check if it's a clickable element
+      const interactiveTags = ['a', 'button', 'input', 'select', 'textarea'];
+      if (interactiveTags.includes(element.tagName.toLowerCase())) {
+        return true;
+      }
+
+      // Check for event listeners or interactive role
+      return element.hasAttribute('onclick') ||
+             (element.getAttribute('role') &&
+              ['button', 'link', 'checkbox', 'radio', 'menuitem', 'tab'].includes(element.getAttribute('role')));
+    };
+
     let getInteractiveRects = function () {
       labelElements(getInteractiveElements());
       let elements = document.querySelectorAll("[__elementId]");
@@ -235,12 +320,20 @@ export const pageScriptDomTreeScript = `(() => {
         let ariaName = getApproximateAriaName(elements[i]);
         let vScrollable =
           elements[i].scrollHeight - elements[i].clientHeight >= 1;
+        let isVisible = isElementVisible(elements[i]);
+        let inViewport = isElementInViewport(elements[i]);
+        let isInteractive = isElementInteractive(elements[i]);
 
         let record = {
           tag_name: ariaRole[1],
           role: ariaRole[0],
           "aria-name": ariaName,
           "v-scrollable": vScrollable,
+          "xpath": getXPath(elements[i]),
+          "attributes": getImportantAttributes(elements[i]),
+          "is_visible": isVisible,
+          "is_interactive": isInteractive,
+          "in_viewport": inViewport,
           rects: []
         };
 
