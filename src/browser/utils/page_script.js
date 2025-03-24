@@ -21,7 +21,8 @@ export const pageScriptDomTreeScript = `(() => {
       search: "search",
       select: "combobox",
       option: "option",
-      textarea: "textbox"
+      textarea: "textbox",
+      presentation: "textbox"
     };
 
     let getCursor = function (elm) {
@@ -56,7 +57,22 @@ export const pageScriptDomTreeScript = `(() => {
         "grid",
         "listbox",
         "radiogroup",
-        "widget"
+        "widget",
+        "button-icon",
+        "dialog",
+        "button-text-icon-only",
+        "alert",
+        "dropdown",
+        "a-button-text",
+        "region",
+        "tabpanel",
+        "click",
+        "button-text",
+        "a-button-inner",
+        "a-dropdown-button",
+        "button-icon-only",
+        "tooltip",
+        "presentation"
       ];
       let inertCursors = [
         "auto",

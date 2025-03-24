@@ -89,6 +89,12 @@ const debugButtons: DebugButton[] = [
         className: "bg-emerald-100 hover:bg-emerald-200 text-emerald-800 dark:bg-emerald-900 dark:hover:bg-emerald-800 dark:text-emerald-200"
     },
     {
+        action: ActionType.GET_DOM_TREE_WITH_NEW_SCRIPT,
+        label: "DOM Tree (New Script)",
+        icon: <GitFork className="h-4 w-4 mr-2" />,
+        className: "bg-indigo-100 hover:bg-indigo-200 text-indigo-800 dark:bg-indigo-900 dark:hover:bg-indigo-800 dark:text-indigo-200"
+    },
+    {
         action: ActionType.GET_CLICKABLE_ELEMENTS,
         label: "All Clickable Elements",
         icon: <Target className="h-4 w-4 mr-2" />,

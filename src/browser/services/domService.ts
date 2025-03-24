@@ -3,6 +3,7 @@ import { browserService } from "./browserService";
 import { domTraversalScript } from "../utils/domTraversal";
 import { buildDomTreeScript } from "../utils/buildDomTree";
 import { pageScriptDomTreeScript } from "../utils/page_script";
+import { newPageScriptDomTreeScript } from "../utils/newPageScript";
 
 class DomService {
     getDomTree: () => Promise<BrowserServiceResponse>;
@@ -47,7 +48,11 @@ class DomService {
         try
         {
             const { page } = await browserService.getOrCreateConnection();
-            const tree = await page.evaluate(buildDomTreeScript);
+            const tree = await page.evaluate(buildDomTreeScript) as {
+                rootId: string;
+                map: Record<string, any>;
+                perfMetrics?: any;
+            };
 
             return {
                 success: true,
@@ -96,6 +101,34 @@ class DomService {
     }
 
     /**
+     * Get DOM tree using new page script implementation with enhanced DOM information
+     * @returns {Promise<BrowserServiceResponse>} Response with enhanced DOM tree data
+     */
+    async getDomTreeWithNewScript(): Promise<BrowserServiceResponse> {
+        try
+        {
+            const { page } = await browserService.getOrCreateConnection();
+            const tree = await page.evaluate(newPageScriptDomTreeScript);
+
+            return {
+                success: true,
+                message: "DOM Tree Snapshot (page_script)",
+                data: {
+                    timestamp: new Date().toISOString(),
+                    tree
+                }
+            };
+        } catch (error)
+        {
+            return {
+                success: false,
+                message: error instanceof Error ? error.message : String(error),
+                error: error instanceof Error ? error : new Error(String(error))
+            };
+        }
+    }
+
+    /**
      * Get clickable elements using buildDomTree implementation
      * @returns {Promise<BrowserServiceResponse>} Response with clickable elements data
      */
@@ -103,7 +136,11 @@ class DomService {
         try
         {
             const { page } = await browserService.getOrCreateConnection();
-            const rawTree = await page.evaluate(buildDomTreeScript);
+            const rawTree = await page.evaluate(buildDomTreeScript) as {
+                rootId: string;
+                map: Record<string, any>;
+                perfMetrics?: any;
+            };
 
             // Process the raw tree to create both hierarchical DOM structure and selector map
             const elementTree = this.processElementTree(rawTree);
@@ -144,7 +181,11 @@ class DomService {
         try
         {
             const { page } = await browserService.getOrCreateConnection();
-            const rawTree = await page.evaluate(buildDomTreeScript);
+            const rawTree = await page.evaluate(buildDomTreeScript) as {
+                rootId: string;
+                map: Record<string, any>;
+                perfMetrics?: any;
+            };
 
             // Process just the element tree
             const elementTree = this.processElementTree(rawTree);
@@ -178,7 +219,11 @@ class DomService {
         try
         {
             const { page } = await browserService.getOrCreateConnection();
-            const rawTree = await page.evaluate(buildDomTreeScript);
+            const rawTree = await page.evaluate(buildDomTreeScript) as {
+                rootId: string;
+                map: Record<string, any>;
+                perfMetrics?: any;
+            };
 
             // First need to process the element tree for parent-child relationships
             const elementTree = this.processElementTree(rawTree);
@@ -219,7 +264,11 @@ class DomService {
         try
         {
             const { page } = await browserService.getOrCreateConnection();
-            const rawTree = await page.evaluate(buildDomTreeScript);
+            const rawTree = await page.evaluate(buildDomTreeScript) as {
+                rootId: string;
+                map: Record<string, any>;
+                perfMetrics?: any;
+            };
 
             // First need to process the element tree for parent-child relationships
             const elementTree = this.processElementTree(rawTree);

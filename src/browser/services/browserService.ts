@@ -204,6 +204,10 @@ class BrowserService {
     async getTextMap() {
         return domService.getTextMap();
     }
+
+    async getDomTreeWithNewScript() {
+        return domService.getDomTreeWithNewScript();
+    }
 }
 
 export const browserService = new BrowserService();
