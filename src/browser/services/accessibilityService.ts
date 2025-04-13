@@ -1,5 +1,7 @@
 import { BrowserServiceResponse } from "../types";
-import { browserService } from "./browserService";
+//import { browserService } from "./browserService";
+import { generateAriaTree, renderAriaTree } from "../snapshot/ariaSnapshot";
+
 
 class AccessibilityService {
     /**
@@ -9,12 +11,19 @@ class AccessibilityService {
     async getAccessibilitySnapshot(): Promise<BrowserServiceResponse> {
         try
         {
-            const { page } = await browserService.getOrCreateConnection();
+            //const { page } = await browserService.getOrCreateConnection();
+
+
+            const ariaTree = generateAriaTree(document.body, 1);
+            const snapshot = renderAriaTree(ariaTree, {
+                mode: 'raw',
+                ref: true  // Enable element references in output
+            });
 
             // Get Puppeteer's accessibility snapshot
-            const snapshot = await page.accessibility.snapshot({
-                interestingOnly: true // Do not Get all nodes, just interesting ones
-            });
+            //const snapshot = await page.accessibility.snapshot({
+            //    interestingOnly: true // Do not Get all nodes, just interesting ones
+            //});
 
             return {
                 success: true,
