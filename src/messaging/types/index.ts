@@ -2,6 +2,7 @@ import { BrowserServiceResponse } from "../../browser/types";
 
 export enum ActionType {
     TEST_CONNECTION = "TEST_CONNECTION",
+    HIGHLIGHT_BY_REF = "HIGHLIGHT_BY_REF",
     GET_PAGE_TITLE = "GET_PAGE_TITLE",
     HIGHLIGHT_LINKS = "HIGHLIGHT_LINKS",
     ANALYZE_PAGE = "ANALYZE_PAGE",
