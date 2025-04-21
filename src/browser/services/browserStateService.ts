@@ -44,7 +44,7 @@ class BrowserStateService {
                 title: titleResponse.message,
                 viewport: viewportResponse.data,
                 interactiveMap: interactiveMapResponse.data.elements,
-                accessibility: accessibilityResponse.data.snapshot
+                accessibility: "" //accessibilityResponse.data.snapshot
             };
 
             return {

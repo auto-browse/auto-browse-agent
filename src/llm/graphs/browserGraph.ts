@@ -14,10 +14,23 @@ import { BrowserGraphState } from "./types/state";
 }; */
 
 const shouldContinue = (state: typeof BrowserGraphState.State) => {
-    if (state.planString.startsWith("Task completed:"))
+    // Check if planString is a string before calling startsWith
+    if (typeof state.planString === 'string' && state.planString.startsWith("Task completed:"))
     {
         return "end";
     }
+
+    // If planString is an object with a description property
+    const planObj = state.planString as any;
+    if (planObj &&
+        typeof planObj === 'object' &&
+        'description' in planObj &&
+        typeof planObj.description === 'string' &&
+        planObj.description.startsWith("Task completed:"))
+    {
+        return "end";
+    }
+
     return "browser";
 };
 

@@ -50,7 +50,7 @@ export const useMessageHandler = () => {
         try
         {
             const response = await processMessage(message) as GraphResponse;
-            console.log("Response from processMessage:", response);
+            //console.log("Response from processMessage:", response);
 
             let output = "";
             const time = new Intl.DateTimeFormat('en-US', {
@@ -62,11 +62,11 @@ export const useMessageHandler = () => {
             // Process messages from the graph output
             for (const msg of response.messages)
             {
-                console.log("Processing message:", msg);
+                //console.log("Processing message:", msg);
 
                 if (msg instanceof AIMessageChunk)
                 {
-                    console.log("Processing AIMessageChunk:", msg);
+                    //console.log("Processing AIMessageChunk:", msg);
                     if (hasToolCallChunks(msg))
                     {
                         const chunk = msg.tool_call_chunks[0];
@@ -79,7 +79,7 @@ export const useMessageHandler = () => {
                 }
                 else if (msg instanceof AIMessage)
                 {
-                    console.log("Processing AIMessage:", msg);
+                    //console.log("Processing AIMessage:", msg);
                     if (msg.content)
                     {
                         output += `${msg.content}\n`;
@@ -97,17 +97,18 @@ export const useMessageHandler = () => {
                 }
                 else if (msg instanceof ToolMessage)
                 {
-                    console.log("Processing ToolMessage:", msg);
+                    //console.log("Processing ToolMessage:", msg);
                     output += `Tool Response: ${msg.content}\n`;
                 }
                 else if ('content' in msg && msg.content)
                 {
-                    console.log("Processing other message type:", msg);
+                    //console.log("Processing other message type:", msg);
                     output += `${msg.content}\n`;
                 }
             }
 
-            const finalOutput = output.trim();
+            //const finalOutput = output.trim();
+            const finalOutput = response.messages[response.messages.length - 1].content
             setMessage(`${time}\n${finalOutput}\n${time}`);
 
             return {
@@ -116,7 +117,7 @@ export const useMessageHandler = () => {
             } as MessageResponse;
         } catch (error)
         {
-            console.error("Error in chat:", error);
+            //console.error("Error in chat:", error);
             const errorMessage = `Error: ${error instanceof Error ? error.message : "Unknown error"}`;
             setMessage(errorMessage);
             return {
@@ -145,7 +146,7 @@ export const useMessageHandler = () => {
             return response;
         } catch (error)
         {
-            console.error(`Error handling action ${action}:`, error);
+            //console.error(`Error handling action ${action}:`, error);
             const errorMessage = `Error: ${error instanceof Error ? error.message : "Unknown error"}`;
             setMessage(errorMessage);
             return {

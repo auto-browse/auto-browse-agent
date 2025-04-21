@@ -35,12 +35,11 @@ export async function createVerifierAgent() {
     const verifierPrompt = `You are a plan execution verifier. Your job is to analyze if a planned action was successfully executed based on the current page state.
 
 Planned Action: {planString}
-Action Result: {reactresult}
 
 Current Page State:
 ${stateMessage}
 
-Analyze the plan, its result, and the current page state to determine if the action was successfully completed.
+Analyze the plan, and the current page state to determine if the action was successfully completed.
 If successful, explain what indicates success.
 If not successful, explain what's missing or what went wrong.`;
 
