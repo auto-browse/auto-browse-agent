@@ -34,7 +34,7 @@ const shouldContinue = (state: typeof BrowserGraphState.State) => {
     return "browser";
 };
 
-export async function processMessage(message: string) {
+const createBrowserGraph = () => {
     const graph = new StateGraph(BrowserGraphState);
 
     graph.addNode("planner", plannerNode)
@@ -48,7 +48,11 @@ export async function processMessage(message: string) {
         .addEdge("browser", "verifier")
         .addEdge("verifier", "planner");
 
-    const compiledGraph = graph.compile({ name: "browser_graph" });
+    return graph.compile({ name: "browser_graph" });
+};
+
+export async function processMessage(message: string) {
+    const compiledGraph = createBrowserGraph();
     return compiledGraph.invoke({
         task: message,
         messages: [],
@@ -56,4 +60,23 @@ export async function processMessage(message: string) {
         pastSteps: [],
         reactresult: ""
     }, { recursionLimit: 100 });
+}
+
+export async function* streamMessage(message: string) {
+    const compiledGraph = createBrowserGraph();
+    const stream = await compiledGraph.stream({
+        task: message,
+        messages: [],
+        planString: "",
+        pastSteps: [],
+        reactresult: ""
+    }, {
+        recursionLimit: 100,
+        streamMode: "updates"
+    });
+
+    for await (const chunk of stream)
+    {
+        yield chunk;
+    }
 }

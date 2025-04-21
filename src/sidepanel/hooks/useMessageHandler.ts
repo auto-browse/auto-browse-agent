@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { handleMessage } from "@/messaging/handlers/messageHandler";
 import { ActionType, MessageRequest, MessageResponse } from "@/messaging/types";
-import { processMessage } from "@/llm/graphs/browserGraph";
+import { streamMessage } from "@/llm/graphs/browserGraph";
 import {
     AIMessage,
     BaseMessage,
@@ -9,6 +9,7 @@ import {
     ToolMessage,
     MessageType
 } from "@langchain/core/messages";
+import { NodeUpdate } from "@/components/shared/NodeStatusDisplay";
 
 type ExtendedMessage = BaseMessage & {
     _getType?: () => MessageType;
@@ -19,12 +20,13 @@ type ExtendedMessage = BaseMessage & {
     name?: string;
 };
 
-interface GraphResponse {
+// Define node values type to avoid unknown type errors
+interface NodeValues {
     messages: ExtendedMessage[];
-    task: string;
-    planString: string;
-    pastSteps: [string, string][];
-    reactresult: string;
+    task?: string;
+    planString?: string;
+    pastSteps?: [string, string][];
+    reactresult?: string;
 }
 
 // Type guard functions
@@ -40,76 +42,119 @@ function hasAdditionalKwargsWithToolCalls(msg: AIMessage): boolean {
     );
 }
 
+// Extract content from a message
+function extractMessageContent(msg: ExtendedMessage): string {
+    if (msg instanceof AIMessageChunk)
+    {
+        if (hasToolCallChunks(msg))
+        {
+            const chunk = msg.tool_call_chunks[0];
+            return `Tool: ${chunk.name}\nArgs: ${chunk.args}`;
+        } else if (msg.content)
+        {
+            return String(msg.content);
+        }
+    } else if (msg instanceof AIMessage)
+    {
+        if (msg.content)
+        {
+            const content = String(msg.content);
+            return content;
+        }
+        if (hasAdditionalKwargsWithToolCalls(msg))
+        {
+            const toolCalls = msg.additional_kwargs.tool_calls;
+            if (toolCalls && toolCalls.length > 0)
+            {
+                const tool = toolCalls[0];
+                return `Tool: ${tool.function.name}\nArgs: ${tool.function.arguments}`;
+            }
+        }
+    } else if (msg instanceof ToolMessage)
+    {
+        return `Tool Result: ${msg.content}`;
+    } else if ('content' in msg && msg.content)
+    {
+        return String(msg.content);
+    }
+    return "";
+}
+
 export const useMessageHandler = () => {
     const [message, setMessage] = useState<string>("");
     const [screenshot, setScreenshot] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [nodeUpdates, setNodeUpdates] = useState<NodeUpdate[]>([]);
+    const [currentNode, setCurrentNode] = useState<string | undefined>(undefined);
 
-    const handleChat = async (message: string): Promise<MessageResponse> => {
+    // Function to get streaming updates
+    const handleChatWithStreaming = async (message: string): Promise<MessageResponse> => {
         setIsLoading(true);
+        setNodeUpdates([]);
+        setCurrentNode(undefined);
+
         try
         {
-            const response = await processMessage(message) as GraphResponse;
-            //console.log("Response from processMessage:", response);
+            const streamGenerator = streamMessage(message);
+            let finalOutput = "";
+            let latestMessages: ExtendedMessage[] = [];
 
-            let output = "";
-            const time = new Intl.DateTimeFormat('en-US', {
-                hour: "numeric",
-                minute: "2-digit",
-                hour12: true
-            }).format(new Date());
-
-            // Process messages from the graph output
-            for (const msg of response.messages)
+            for await (const chunk of streamGenerator)
             {
-                //console.log("Processing message:", msg);
+                for (const [nodeName, nodeValue] of Object.entries(chunk))
+                {
+                    setCurrentNode(nodeName);
 
-                if (msg instanceof AIMessageChunk)
-                {
-                    //console.log("Processing AIMessageChunk:", msg);
-                    if (hasToolCallChunks(msg))
+                    // Type assertion to avoid unknown type errors
+                    const values = nodeValue as NodeValues;
+
+                    // Create node update entry
+                    if (values.messages && values.messages.length > 0)
                     {
-                        const chunk = msg.tool_call_chunks[0];
-                        output += `Tool Call: ${chunk.name}\n`;
-                        output += `Arguments: ${chunk.args}\n`;
-                    } else if (msg.content)
-                    {
-                        output += `${msg.content}\n`;
+                        const latestMsg = values.messages[values.messages.length - 1];
+                        const content = extractMessageContent(latestMsg);
+
+                        // Store the latest messages for final output
+                        latestMessages = values.messages;
+
+                        // Add update for this node
+                        setNodeUpdates(prev => [
+                            ...prev,
+                            {
+                                node: nodeName,
+                                status: "active",
+                                content: content.length > 300
+                                    ? content.substring(0, 300) + "..."
+                                    : content,
+                                timestamp: new Date()
+                            }
+                        ]);
                     }
-                }
-                else if (msg instanceof AIMessage)
-                {
-                    //console.log("Processing AIMessage:", msg);
-                    if (msg.content)
-                    {
-                        output += `${msg.content}\n`;
-                    }
-                    if (hasAdditionalKwargsWithToolCalls(msg))
-                    {
-                        const toolCalls = msg.additional_kwargs.tool_calls;
-                        if (toolCalls && toolCalls.length > 0)
-                        {
-                            const tool = toolCalls[0];
-                            output += `Tool Call: ${tool.function.name}\n`;
-                            output += `Arguments: ${tool.function.arguments}\n`;
-                        }
-                    }
-                }
-                else if (msg instanceof ToolMessage)
-                {
-                    //console.log("Processing ToolMessage:", msg);
-                    output += `Tool Response: ${msg.content}\n`;
-                }
-                else if ('content' in msg && msg.content)
-                {
-                    //console.log("Processing other message type:", msg);
-                    output += `${msg.content}\n`;
                 }
             }
 
-            //const finalOutput = output.trim();
-            const finalOutput = response.messages[response.messages.length - 1].content
-            setMessage(`${time}\n${finalOutput}\n${time}`);
+            // Mark the current node as completed when stream ends
+            setNodeUpdates(prev => {
+                const updatedList = [...prev];
+                if (currentNode)
+                {
+                    updatedList.push({
+                        node: currentNode,
+                        status: "completed",
+                        timestamp: new Date()
+                    });
+                }
+                return updatedList;
+            });
+
+            // Get the final message
+            if (latestMessages.length > 0)
+            {
+                finalOutput = extractMessageContent(latestMessages[latestMessages.length - 1]);
+            }
+
+            setMessage(finalOutput);
+            setCurrentNode(undefined);
 
             return {
                 success: true,
@@ -117,9 +162,20 @@ export const useMessageHandler = () => {
             } as MessageResponse;
         } catch (error)
         {
-            //console.error("Error in chat:", error);
             const errorMessage = `Error: ${error instanceof Error ? error.message : "Unknown error"}`;
             setMessage(errorMessage);
+
+            // Add error state to node updates
+            setNodeUpdates(prev => [
+                ...prev,
+                {
+                    node: currentNode || "unknown",
+                    status: "completed",
+                    content: errorMessage,
+                    timestamp: new Date()
+                }
+            ]);
+
             return {
                 success: false,
                 message: errorMessage,
@@ -129,6 +185,12 @@ export const useMessageHandler = () => {
         {
             setIsLoading(false);
         }
+    };
+
+    // Keep the original non-streaming version for compatibility
+    const handleChat = async (message: string): Promise<MessageResponse> => {
+        // Use streaming by default
+        return handleChatWithStreaming(message);
     };
 
     const handleAction = async (action: ActionType): Promise<MessageResponse> => {
@@ -146,7 +208,6 @@ export const useMessageHandler = () => {
             return response;
         } catch (error)
         {
-            //console.error(`Error handling action ${action}:`, error);
             const errorMessage = `Error: ${error instanceof Error ? error.message : "Unknown error"}`;
             setMessage(errorMessage);
             return {
@@ -166,5 +227,7 @@ export const useMessageHandler = () => {
         handleAction,
         handleChat,
         screenshot,
+        nodeUpdates,
+        currentNode
     };
 };
