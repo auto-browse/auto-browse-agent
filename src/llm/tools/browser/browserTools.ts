@@ -1,6 +1,7 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { browserService } from "../../../browser/services/browserService";
+import { browserStateService } from "../../../browser/services/browserStateService";
 // Type definitions
 export type NavigationParams = {};
 
@@ -26,6 +27,8 @@ export type FillParams = {
     selector: string;
     value: string;
 };
+
+export type GetBrowserStateParams = {};
 
 // Function to create and initialize tools
 export function createBrowserTools() {
@@ -54,6 +57,8 @@ export function createBrowserTools() {
         selector: z.string().min(1, "Selector cannot be empty"),
         value: z.string().min(1, "Value cannot be empty")
     });
+
+    const getBrowserStateSchema = z.object({});
 
     // Tool creation
     const gotoTool = tool(
@@ -303,7 +308,29 @@ export function createBrowserTools() {
         }
     );
 
-
+    const getBrowserStateTool = tool(
+        async (_input: GetBrowserStateParams): Promise<string> => {
+            try
+            {
+                const response = await browserStateService.getBrowserState();
+                if (response.success)
+                {
+                    return response.message;
+                } else
+                {
+                    return `Failed to get browser state: ${response.error?.message || 'Unknown error'}`;
+                }
+            } catch (error)
+            {
+                return `Error getting browser state: ${error instanceof Error ? error.message : String(error)}`;
+            }
+        },
+        {
+            name: "getBrowserState",
+            description: "Get complete information about the current browser state including URL, title, viewport metrics, interactive elements, and accessibility tree",
+            schema: getBrowserStateSchema,
+        }
+    );
 
     // Return tool collection
     return [
@@ -315,6 +342,7 @@ export function createBrowserTools() {
         scrollUpTool,
         scrollDownTool,
         scrollToTextTool,
-        extractContentTool
+        extractContentTool,
+        getBrowserStateTool
     ];
 }

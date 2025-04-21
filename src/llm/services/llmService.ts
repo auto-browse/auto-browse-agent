@@ -1,6 +1,9 @@
 import { ChatOpenAI } from "@langchain/openai";
+import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatOllama } from "@langchain/ollama";
 import { storageService } from "@/storage/services/storageService";
-import { Settings } from "@/storage/types/settings";
+import { Settings, OllamaSettings } from "@/storage/types/settings";
 import { LLMProviders } from "../types/providers";
 
 export interface LLMOptions {
@@ -16,18 +19,42 @@ export async function createLLM(options: LLMOptions = { streaming: true, tempera
     }
 
     const settings = response.data as Settings;
-    const openAIKey = settings.apiKeys.find(
-        key => key.provider.toLowerCase() === LLMProviders.OPENAI.toLowerCase()
-    )?.key;
+    const provider = settings.providers.find(p => p.provider === settings.selectedProvider);
 
-    if (!openAIKey)
+    if (!provider)
     {
-        throw new Error('OpenAI API key not configured');
+        throw new Error(`Provider ${settings.selectedProvider} not configured`);
     }
 
-    return new ChatOpenAI({
-        openAIApiKey: openAIKey,
-        modelName: "gpt-4o-mini",
-        ...options
-    });
+    switch (settings.selectedProvider)
+    {
+        case LLMProviders.ANTHROPIC:
+            return new ChatAnthropic({
+                anthropicApiKey: provider.settings.key,
+                modelName: provider.settings.model,
+                ...options
+            });
+
+        case LLMProviders.GOOGLE_AI:
+            return new ChatGoogleGenerativeAI({
+                apiKey: provider.settings.key,
+                model: provider.settings.model,
+                ...options
+            });
+
+        case LLMProviders.OLLAMA:
+            const ollamaSettings = provider.settings as OllamaSettings;
+            return new ChatOllama({
+                model: ollamaSettings.model,
+                baseUrl: ollamaSettings.baseUrl,
+                ...options
+            });
+
+        default: // OpenAI
+            return new ChatOpenAI({
+                openAIApiKey: provider.settings.key,
+                modelName: provider.settings.model,
+                ...options
+            });
+    }
 }

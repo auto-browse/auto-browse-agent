@@ -1,13 +1,22 @@
 import { LLMProviderName } from "@/llm/types/providers";
 
-export interface ApiKey {
-    provider: LLMProviderName;
+export interface BaseProviderSettings {
     key: string;
+    model: string;
+}
+
+export interface OllamaSettings extends BaseProviderSettings {
+    baseUrl: string;
+}
+
+export interface ProviderSettings {
+    provider: LLMProviderName;
+    settings: OllamaSettings | BaseProviderSettings;
 }
 
 export interface Settings {
     selectedProvider: LLMProviderName;
-    apiKeys: ApiKey[];
+    providers: ProviderSettings[];
 }
 
 export interface StorageKey {

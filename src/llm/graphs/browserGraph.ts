@@ -55,5 +55,5 @@ export async function processMessage(message: string) {
         planString: "",
         pastSteps: [],
         reactresult: ""
-    });
+    }, { recursionLimit: 100 });
 }
