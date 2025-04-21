@@ -73,36 +73,6 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
-            case ActionType.GET_DOM_TREE: {
-                const response = await browserService.getDomTree();
-                return {
-                    success: response.success,
-                    message: response.message,
-                    error: response.error,
-                    data: response.data
-                };
-            }
-
-            case ActionType.GET_DOM_TREE_WITH_BUILD: {
-                const response = await browserService.getDomTreeWithBuild();
-                return {
-                    success: response.success,
-                    message: response.message,
-                    error: response.error,
-                    data: response.data
-                };
-            }
-
-            case ActionType.GET_DOM_TREE_WITH_PAGE_SCRIPT: {
-                const response = await browserService.getDomTreeWithPageScript();
-                return {
-                    success: response.success,
-                    message: response.message,
-                    error: response.error,
-                    data: response.data
-                };
-            }
-
             case ActionType.ANALYZE_COOKIE_BANNERS: {
                 const response = await browserService.analyzeCookieBanners();
                 return {
@@ -165,56 +135,6 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
 
             case ActionType.GET_BROWSER_STATE: {
                 const response = await browserService.getBrowserState();
-                return {
-                    success: response.success,
-                    message: response.message,
-                    error: response.error,
-                    data: response.data
-                };
-            }
-
-            case ActionType.GET_CLICKABLE_ELEMENTS: {
-                const response = await browserService.getClickableElements();
-                return {
-                    success: response.success,
-                    message: response.message,
-                    error: response.error,
-                    data: response.data
-                };
-            }
-
-            case ActionType.GET_ELEMENT_TREE: {
-                const response = await browserService.getElementTree();
-                return {
-                    success: response.success,
-                    message: response.message,
-                    error: response.error,
-                    data: response.data
-                };
-            }
-
-            case ActionType.GET_SELECTOR_MAP: {
-                const response = await browserService.getSelectorMap();
-                return {
-                    success: response.success,
-                    message: response.message,
-                    error: response.error,
-                    data: response.data
-                };
-            }
-
-            case ActionType.GET_TEXT_MAP: {
-                const response = await browserService.getTextMap();
-                return {
-                    success: response.success,
-                    message: response.message,
-                    error: response.error,
-                    data: response.data
-                };
-            }
-
-            case ActionType.GET_DOM_TREE_WITH_NEW_SCRIPT: {
-                const response = await browserService.getDomTreeWithNewScript();
                 return {
                     success: response.success,
                     message: response.message,

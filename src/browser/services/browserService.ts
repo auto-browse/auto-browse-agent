@@ -10,7 +10,6 @@ import { pageInfoService } from "./pageInfoService";
 import { accessibilityService } from "./accessibilityService";
 import { screenshotService } from "./screenshotService";
 import { analysisService } from "./analysisService";
-import { domService } from "./domService";
 import { cookieService } from "./cookieService";
 import { shadowDomService } from "./shadowDomService";
 import { interactiveMapService } from "./interactiveMapService";
@@ -145,17 +144,7 @@ class BrowserService {
         return analysisService.analyzePage();
     }
 
-    async getDomTree() {
-        return domService.getDomTree();
-    }
 
-    async getDomTreeWithBuild() {
-        return domService.getDomTreeWithBuildDomTree();
-    }
-
-    async getDomTreeWithPageScript() {
-        return domService.getDomTreeWithPageScript();
-    }
 
     async analyzeCookieBanners() {
         return cookieService.analyzeCookieBanners();
@@ -187,26 +176,6 @@ class BrowserService {
 
     async getBrowserState() {
         return browserStateService.getBrowserState();
-    }
-
-    async getClickableElements() {
-        return domService.getClickableElements();
-    }
-
-    async getElementTree() {
-        return domService.getElementTree();
-    }
-
-    async getSelectorMap() {
-        return domService.getSelectorMap();
-    }
-
-    async getTextMap() {
-        return domService.getTextMap();
-    }
-
-    async getDomTreeWithNewScript() {
-        return domService.getDomTreeWithNewScript();
     }
 }
 

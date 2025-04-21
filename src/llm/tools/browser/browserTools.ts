@@ -1,8 +1,6 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { browserService } from "../../../browser/services/browserService";
-import { domService } from "../../../browser/services/domService";
-
 // Type definitions
 export type NavigationParams = {};
 
@@ -305,49 +303,7 @@ export function createBrowserTools() {
         }
     );
 
-    const getDomTreeWithBuildTool = tool(
-        async (_input: ExtractContentParams): Promise<string> => {
-            try
-            {
-                const result = await domService.getDomTreeWithBuildDomTree();
-                return JSON.stringify({
-                    success: result.success,
-                    message: result.message,
-                    data: result.data
-                });
-            } catch (error)
-            {
-                return `Error getting DOM tree with buildDomTree: ${error instanceof Error ? error.message : String(error)}`;
-            }
-        },
-        {
-            name: "getDomTreeWithBuild",
-            description: "Get DOM tree using buildDomTree implementation with caching and performance metrics",
-            schema: extractContentSchema,
-        }
-    );
 
-    const getDomTreeWithPageScriptTool = tool(
-        async (_input: ExtractContentParams): Promise<string> => {
-            try
-            {
-                const result = await domService.getDomTreeWithPageScript();
-                return JSON.stringify({
-                    success: result.success,
-                    message: result.message,
-                    data: result.data
-                });
-            } catch (error)
-            {
-                return `Error getting DOM tree with page_script: ${error instanceof Error ? error.message : String(error)}`;
-            }
-        },
-        {
-            name: "getDomTreeWithPageScript",
-            description: "Get DOM tree using page_script implementation focusing on interactive elements",
-            schema: extractContentSchema,
-        }
-    );
 
     // Return tool collection
     return [
@@ -359,8 +315,6 @@ export function createBrowserTools() {
         scrollUpTool,
         scrollDownTool,
         scrollToTextTool,
-        extractContentTool,
-        getDomTreeWithBuildTool,
-        getDomTreeWithPageScriptTool
+        extractContentTool
     ];
 }

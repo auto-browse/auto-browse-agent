@@ -42,7 +42,7 @@ ${stateMessage}
 Analyze the plan, and the current page state to determine if the action was successfully completed.
 If successful, explain what indicates success.
 If not successful, explain what's missing or what went wrong.`;
-
+    console.log(verifierPrompt);
     return await createReactAgent({
         llm: model,
         tools: [],

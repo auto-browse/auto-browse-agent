@@ -135,7 +135,7 @@ Current Browser State:
 ${stateMessage}
 `;
 
-    //console.log(plannerPrompt);
+    console.log(plannerPrompt);
     return await createReactAgent({
         llm: model,
         tools: [],

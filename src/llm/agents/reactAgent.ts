@@ -59,7 +59,7 @@ Your output must be a stringified JSON object with exactly these fields:
 Current Browser State:
 ${stateMessage}`;
 
-    //console.log(customPrompt);
+    console.log(customPrompt);
 
     return await createReactAgent({
         llm: llmWithTools,

@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
-    "name": "Auto Browse Extension",
-    "description": "A browser extension for automated browsing with LLM integration",
+    "name": "Auto-Browse",
+    "description": "A browser extension for automated web browsing using LLMs",
     "version": "1.0.0",
     "permissions": [
         "activeTab",

@@ -44,7 +44,7 @@ class BrowserStateService {
                 title: titleResponse.message,
                 viewport: viewportResponse.data,
                 interactiveMap: interactiveMapResponse.data.elements,
-                accessibility: "" //accessibilityResponse.data.snapshot
+                accessibility: accessibilityResponse.data.snapshot
             };
 
             return {
@@ -82,8 +82,8 @@ ${state.interactiveMap.length === 0 ? 'empty page' : `${state.viewport.pixelsAbo
 
 ## Accessibility Tree
 
-\`\`\`json
-${JSON.stringify(state.accessibility, null, 2)}
+\`\`\`yaml
+${state.accessibility}
 \`\`\`
 
 `,
