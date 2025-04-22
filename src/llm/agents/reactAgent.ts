@@ -51,7 +51,7 @@ IMPORTANT RULES:
      * URL and title to confirm the correct page
      * Interactive elements available for clicking, typing, etc.
      * Viewport metrics to determine if scrolling is needed
-     * Accessibility tree to understand page structure
+     * Accessibility tree to understand page structure. Note, do not try to fetch this until abosolutely necessary. Use the interactive map instead.
    - Use this information to make informed decisions about which actions to take
 
 5. ELEMENT SELECTION:

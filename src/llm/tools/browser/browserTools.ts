@@ -1,7 +1,7 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { browserService } from "../../../browser/services/browserService";
-import { browserStateService } from "../../../browser/services/browserStateService";
+import { browserStateService, GetBrowserStateOptions } from "../../../browser/services/browserStateService";
 // Type definitions
 export type NavigationParams = {};
 
@@ -28,7 +28,13 @@ export type FillParams = {
     value: string;
 };
 
-export type GetBrowserStateParams = {};
+export type GetBrowserStateParams = {
+    includeUrl?: boolean;
+    includeTitle?: boolean;
+    includeViewport?: boolean;
+    includeInteractiveMap?: boolean;
+    includeAccessibility?: boolean;
+};
 
 // Function to create and initialize tools
 export function createBrowserTools() {
@@ -58,7 +64,13 @@ export function createBrowserTools() {
         value: z.string().min(1, "Value cannot be empty")
     });
 
-    const getBrowserStateSchema = z.object({});
+    const getBrowserStateSchema = z.object({
+        includeUrl: z.boolean().optional().default(true),
+        includeTitle: z.boolean().optional().default(true),
+        includeViewport: z.boolean().optional().default(true),
+        includeInteractiveMap: z.boolean().optional().default(true),
+        includeAccessibility: z.boolean().optional().default(false)
+    });
 
     // Tool creation
     const gotoTool = tool(
@@ -309,10 +321,18 @@ export function createBrowserTools() {
     );
 
     const getBrowserStateTool = tool(
-        async (_input: GetBrowserStateParams): Promise<string> => {
+        async (input: GetBrowserStateParams): Promise<string> => {
             try
             {
-                const response = await browserStateService.getBrowserState();
+                const options: GetBrowserStateOptions = {
+                    includeUrl: input.includeUrl,
+                    includeTitle: input.includeTitle,
+                    includeViewport: input.includeViewport,
+                    includeInteractiveMap: input.includeInteractiveMap,
+                    includeAccessibility: input.includeAccessibility
+                };
+
+                const response = await browserStateService.getBrowserState(options);
                 if (response.success)
                 {
                     return response.message;
@@ -327,7 +347,7 @@ export function createBrowserTools() {
         },
         {
             name: "getBrowserState",
-            description: "Get complete information about the current browser state including URL, title, viewport metrics, interactive elements, and accessibility tree",
+            description: "Get information about the current browser state. You can customize which parts to include: URL, title, viewport metrics, interactive elements, and accessibility tree.",
             schema: getBrowserStateSchema,
         }
     );
