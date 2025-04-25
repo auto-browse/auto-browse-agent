@@ -9,7 +9,7 @@ export const verifierNode = async (state: typeof BrowserGraphState.State) => {
             role: "user",
             content: JSON.stringify({
                 planString: state.planString,
-                //reactresult: state.reactresult
+                reactresult: state.reactresult
             }, null, 2)
         }]
     });

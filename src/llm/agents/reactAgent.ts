@@ -1,5 +1,5 @@
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
-import { createBrowserTools } from "../tools/browser/browserTools";
+import { createBrowserTools } from "../tools/browser/browserTools"; // Reverted import
 import { createLLM } from "../services/llmService";
 
 export const BrowserResponseSchema = {
@@ -16,6 +16,7 @@ export const BrowserResponseSchema = {
 export async function createAgent() {
     const model = await createLLM();
 
+    // Call the factory function
     const browserTools = createBrowserTools();
     const llmWithTools = model.bindTools(browserTools, { parallel_tool_calls: false });
 

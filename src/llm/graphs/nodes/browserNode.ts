@@ -39,5 +39,6 @@ export const browserNode = async (state: typeof BrowserGraphState.State) => {
     return {
         messages: result.messages,
         reactresult: final_result,
+        pastSteps: [[state.planString, final_result]]
     };
 };

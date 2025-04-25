@@ -17,6 +17,7 @@ import { xpathService } from "./xpathService";
 import { urlService } from "./urlService";
 import { viewportService } from "./viewportService";
 import { browserStateService } from "./browserStateService";
+import { clickableElementsService, ClickableElementsParams, ClickableElementResult } from "./clickableElementsService"; // Import the singleton instance
 
 /**
  * Service class for managing browser operations using Puppeteer
@@ -24,6 +25,7 @@ import { browserStateService } from "./browserStateService";
 class BrowserService {
     private activeConnection: BrowserConnection | null = null;
     private connectionClosing: Promise<void> | null = null;
+    // Removed private instance creation
 
     /**
      * Gets an existing browser connection or creates a new one
@@ -106,11 +108,11 @@ class BrowserService {
             await page.setRequestInterception(false); // Ensure no interference
 
             // Get actual window dimensions
-            const window = await chrome.windows.get(tab.windowId);
-            await page.setViewport({
-                width: window.width || 800,
-                height: window.height || 600
-            });
+            //const window = await chrome.windows.get(tab.windowId);
+            //await page.setViewport({
+            //    width: window.width || 800,
+            //    height: window.height || 600
+            //});
 
             return { browser: browser as Browser, page: page as Page };
         } catch (connectError)
@@ -176,6 +178,12 @@ class BrowserService {
 
     async getBrowserState() {
         return browserStateService.getBrowserState();
+    }
+
+    // Updated method for clickable elements - connection handling moved to the service
+    async getClickableElements(params: ClickableElementsParams): Promise<ClickableElementResult> {
+        // Directly call the service method, which now handles its own connection
+        return await clickableElementsService.getClickableElements(params);
     }
 }
 

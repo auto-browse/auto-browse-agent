@@ -153,6 +153,26 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
+            case ActionType.GET_CLICKABLE_ELEMENTS: {
+                try
+                {
+                    const response = await browserService.getClickableElements({});
+                    const formattedJson = JSON.stringify(response, null, 2);
+                    return {
+                        success: true,
+                        message: formattedJson,
+                        data: response
+                    };
+                } catch (error)
+                {
+                    return {
+                        success: false,
+                        message: error instanceof Error ? error.message : String(error),
+                        error: error instanceof Error ? error : new Error(String(error))
+                    };
+                }
+            }
+
             case ActionType.TAKE_SCREENSHOT: {
                 const response = await browserService.takeScreenshot();
                 return {

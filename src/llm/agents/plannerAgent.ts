@@ -91,6 +91,8 @@ To reduce API calls and make execution more efficient, follow these guidelines w
    - Navigating to a new URL
    - Submitting a form
    - Clicking links that lead to new pages
+5. While Navigating to a new page, you can combine multiple actions that do not cause page reloads:
+   - "Open the website www.example.com, accept the cookie consent, and navigate to the 'Contact Us' page"
 
 Your input and output will strictly be a well-formatted JSON with attributes as mentioned below.
 
@@ -134,15 +136,14 @@ Example 1: Simple Navigation
     Example Output (when objective is not yet complete)
     {
     "plan": [
-        {"id": 1, "description": "Go to www.skyscanner.com"},
-        {"id": 2, "description": "Handle any cookie consent or popup that appears"},
-        {"id": 3, "description": "Set the journey option to one-way (if not default)"},
-        {"id": 4, "description": "Set number of passengers to 1 (if not default)"},
-        {"id": 5, "description": "Fill in all flight search parameters: from Helsinki to Stockholm on March 15, 2025, Premium Economy class"},
-        {"id": 6, "description": "Click on the search button to get the search results"},
-        {"id": 7, "description": "Extract the price of the cheapest flight from Helsinki to Stockholm from the search results"}
+        {"id": 1, "description": "Go to www.skyscanner.com, Handle any cookie consent or popup that appears"},
+        {"id": 2, "description": "Set the journey option to one-way (if not default)"},
+        {"id": 3, "description": "Set number of passengers to 1 (if not default)"},
+        {"id": 4, "description": "Fill in all flight search parameters: from Helsinki to Stockholm on March 15, 2025, Premium Economy class"},
+        {"id": 5, "description": "Click on the search button to get the search results"},
+        {"id": 6, "description": "Extract the price of the cheapest flight from Helsinki to Stockholm from the search results"}
     ],
-    "action": "Go to www.skyscanner.com"
+    "action": "Go to www.skyscanner.com and Handle any cookie consent or popup that appears"
     }
 
 Example 2: Form Filling (Optimized)

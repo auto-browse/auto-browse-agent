@@ -20,11 +20,11 @@ export type GotoParams = {
 };
 
 export type ClickParams = {
-    selector: string;
+    index: number;
 };
 
 export type FillParams = {
-    selector: string;
+    index: number;
     value: string;
 };
 
@@ -56,11 +56,11 @@ export function createBrowserTools() {
     });
 
     const clickSchema = z.object({
-        selector: z.string().min(1, "Selector cannot be empty")
+        index: z.number().int().nonnegative().describe("autobrowse highlight index")
     });
 
     const fillSchema = z.object({
-        selector: z.string().min(1, "Selector cannot be empty"),
+        index: z.number().int().nonnegative().describe("autobrowse highlight index"),
         value: z.string().min(1, "Value cannot be empty")
     });
 
@@ -100,12 +100,13 @@ export function createBrowserTools() {
             try
             {
                 const { page } = await browserService.getOrCreateConnection();
-                await page.waitForSelector(input.selector);
-                await page.click(input.selector);
-                return `Successfully clicked element at ${input.selector}`;
+                const locator = `[autobrowse-highlight-id="autobrowse-highlight-${input.index}"]`;
+                await page.waitForSelector(locator);
+                await page.click(locator);
+                return `Successfully clicked element #${input.index}`;
             } catch (error)
             {
-                return `Error clicking element at ${input.selector}: ${error instanceof Error ? error.message : String(error)}`;
+                return `Error clicking element #${input.index}: ${error instanceof Error ? error.message : String(error)}`;
             } finally
             {
                 await browserService.closeConnection();
@@ -113,7 +114,7 @@ export function createBrowserTools() {
         },
         {
             name: "click",
-            description: "Click an element on the page using a CSS selector",
+            description: "Click an element by its autobrowse-highlight-id index",
             schema: clickSchema,
         }
     );
@@ -123,12 +124,13 @@ export function createBrowserTools() {
             try
             {
                 const { page } = await browserService.getOrCreateConnection();
-                await page.waitForSelector(input.selector);
-                await page.type(input.selector, input.value);
-                return `Successfully filled element at ${input.selector} with provided value`;
+                const locator = `[autobrowse-highlight-id="autobrowse-highlight-${input.index}"]`;
+                await page.waitForSelector(locator);
+                await page.type(locator, input.value);
+                return `Successfully filled element #${input.index} with provided value`;
             } catch (error)
             {
-                return `Error filling element at ${input.selector}: ${error instanceof Error ? error.message : String(error)}`;
+                return `Error filling element #${input.index}: ${error instanceof Error ? error.message : String(error)}`;
             } finally
             {
                 await browserService.closeConnection();
@@ -136,7 +138,7 @@ export function createBrowserTools() {
         },
         {
             name: "fill",
-            description: "Fill an input field on the page using a CSS selector",
+            description: "Fill an input field by its autobrowse-highlight-id index",
             schema: fillSchema,
         }
     );

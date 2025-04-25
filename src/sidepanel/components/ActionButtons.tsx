@@ -11,7 +11,8 @@ import {
 	Target,
 	Link2,
 	LayoutTemplate,
-	Activity
+	Activity,
+	MousePointer
 } from "lucide-react";
 
 interface ActionButtonsProps {
@@ -103,6 +104,13 @@ const debugButtons: DebugButton[] = [
 		icon: <Activity className="h-4 w-4 mr-2" />,
 		className:
 			"bg-fuchsia-100 hover:bg-fuchsia-200 text-fuchsia-800 dark:bg-fuchsia-900 dark:hover:bg-fuchsia-800 dark:text-fuchsia-200"
+	},
+	{
+		action: ActionType.GET_CLICKABLE_ELEMENTS,
+		label: "Get Clickable Elements",
+		icon: <MousePointer className="h-4 w-4 mr-2" />,
+		className:
+			"bg-amber-100 hover:bg-amber-200 text-amber-800 dark:bg-amber-900 dark:hover:bg-amber-800 dark:text-amber-200"
 	}
 ];
 

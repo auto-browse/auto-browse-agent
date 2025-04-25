@@ -8,20 +8,20 @@ export async function createVerifierAgent() {
     const browserState = await browserStateService.getBrowserState();
     const stateMessage = browserState.success ? browserState.message : 'Failed to get browser state';
 
-    const verifierPrompt = `You are a plan execution verifier. Your job is to analyze if a planned action was successfully executed based on the current page state.
+   const verifierPrompt = `You are a plan execution verifier. Your job is to analyze if a planned action was successfully executed based on the result and current page state.
 
 Planned Action: {planString}
-
+Action Result: {actionResult}
 Current Page State:
 ${stateMessage}
 
 IMPORTANT VERIFICATION GUIDELINES:
 
-1. YOUR PRIMARY ROLE: You MUST assume the browser agent has already EXECUTED the planned action. Your job is to VERIFY if the execution was SUCCESSFUL by examining the current browser state.
+1. YOUR PRIMARY ROLE: You MUST assume the browser agent has already EXECUTED the planned action. Your job is to VERIFY if the execution was SUCCESSFUL by examining the current browser state and result.
 
 2. DO NOT question whether the action was necessary or meaningful. That decision was made by the planner, and the browser agent has already attempted to execute it.
 
-3. Focus ONLY on whether the current browser state reflects the expected outcome of the planned action:
+3. Focus ONLY on whether the result and current browser state reflects the expected outcome of the planned action:
    - For navigation: Is the URL or page title consistent with successful navigation?
    - For clicking: Have new elements appeared or disappeared as expected?
    - For form filling: Are form fields properly populated?
@@ -51,7 +51,7 @@ IMPORTANT VERIFICATION GUIDELINES:
    - "SUCCESS: [explanation of evidence supporting successful execution]"
    - "FAILURE: [explanation of what indicates the action did not complete as expected]"
 
-Analyze the plan and the current page state to determine if the action was successfully completed.`;
+Analyze the plan, result and the current page state to determine if the action was successfully completed.`;
     console.log(verifierPrompt);
     return await createReactAgent({
         llm: model,

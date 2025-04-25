@@ -1,7 +1,7 @@
 import { START, END, StateGraph } from "@langchain/langgraph/web";
 import { browserNode } from "./nodes/browserNode";
 import { plannerNode } from "./nodes/plannerNode";
-import { verifierNode } from "./nodes/verifierNode";
+//import { verifierNode } from "./nodes/verifierNode";
 import { BrowserGraphState } from "./types/state";
 
 // Create route function to control flow based on planString
@@ -39,14 +39,14 @@ const createBrowserGraph = () => {
 
     graph.addNode("planner", plannerNode)
         .addNode("browser", browserNode)
-        .addNode("verifier", verifierNode)
+        //.addNode("verifier", verifierNode)
         .addEdge(START, "planner")
         .addConditionalEdges("planner", shouldContinue, {
             browser: "browser",
             end: END
         })
-        .addEdge("browser", "verifier")
-        .addEdge("verifier", "planner");
+        .addEdge("browser", "planner");
+    //.addEdge("verifier", "planner");
 
     return graph.compile({ name: "browser_graph" });
 };
