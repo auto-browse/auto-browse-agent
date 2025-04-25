@@ -157,11 +157,18 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 try
                 {
                     const response = await browserService.getClickableElements({});
-                    const formattedJson = JSON.stringify(response, null, 2);
+                    const formattedJson = JSON.stringify({
+
+                        historyElementMap: response.historyElementMap
+                    }, null, 2);
+                    // Return only the serializable parts in the data field as well
                     return {
                         success: true,
-                        message: formattedJson,
-                        data: response
+                        message: formattedJson, // Keep the formatted JSON string for the message
+                        data: {
+                            scriptResult: response.scriptResult,
+                            historyElementMap: response.historyElementMap
+                        }
                     };
                 } catch (error)
                 {

@@ -2,7 +2,7 @@ export const buildDomTreeScript = `(() => {
 const args = {
     doHighlightElements: true,
     focusHighlightIndex: -1,
-    viewportExpansion: 0,
+    viewportExpansion: -1,
     debugMode: false,
   };
 
