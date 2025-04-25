@@ -1001,11 +1001,12 @@ const args = {
     }
 
     if (shouldHighlight) {
-      // Check viewport status before assigning index and highlighting
+      // Assign index regardless of viewport status if highlighting is intended
+      nodeData.highlightIndex = highlightIndex++;
+
+      // Check viewport status before visually highlighting
       nodeData.isInViewport = isInExpandedViewport(node, viewportExpansion);
       if (nodeData.isInViewport) {
-        nodeData.highlightIndex = highlightIndex++;
-
         if (doHighlightElements) {
           if (focusHighlightIndex >= 0) {
             if (focusHighlightIndex === nodeData.highlightIndex) {
@@ -1093,6 +1094,7 @@ const args = {
       return null;
     }
 
+    /*
     // Early viewport check - only filter out elements clearly outside viewport
     if (viewportExpansion !== -1) {
       const rect = getCachedBoundingRect(node); // Keep for initial quick check
@@ -1117,6 +1119,7 @@ const args = {
         return null;
       }
     }
+    */
 
     // Process element node
     const nodeData = {
@@ -1137,14 +1140,17 @@ const args = {
     let nodeWasHighlighted = false;
     // Perform visibility, interactivity, and highlighting checks
     if (node.nodeType === Node.ELEMENT_NODE) {
-      nodeData.isVisible = isElementVisible(node); // isElementVisible uses offsetWidth/Height, which is fine
+      nodeData.isVisible = isElementVisible(node);
       if (nodeData.isVisible) {
-        nodeData.isTopElement = isTopElement(node);
-        if (nodeData.isTopElement) {
-          nodeData.isInteractive = isInteractiveElement(node);
-          // Call the dedicated highlighting function
-          nodeWasHighlighted = handleHighlighting(nodeData, node, parentIframe, isParentHighlighted);
+        // Check interactivity first for any visible element
+        nodeData.isInteractive = isInteractiveElement(node);
+        // If it's interactive, call handleHighlighting to assign index
+        // (handleHighlighting internally checks viewport for drawing the visual overlay)
+        if (nodeData.isInteractive) {
+            nodeWasHighlighted = handleHighlighting(nodeData, node, parentIframe, isParentHighlighted);
         }
+        // We can still calculate isTopElement if it's needed elsewhere
+        nodeData.isTopElement = isTopElement(node);
       }
     }
 
