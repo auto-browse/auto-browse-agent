@@ -1002,7 +1002,17 @@ const args = {
 
     if (shouldHighlight) {
       // Assign index regardless of viewport status if highlighting is intended
-      nodeData.highlightIndex = highlightIndex++;
+      nodeData.highlightIndex = highlightIndex++; // Add explicit semicolon
+
+      // Set both DOM attribute and add to our data structure
+      try { // Add try-catch in case setAttribute fails on some nodes
+          const generatedId = 'autobrowse-highlight-' + nodeData.highlightIndex;
+          node.setAttribute('autobrowse-highlight-id', generatedId);
+          nodeData.attributes['autobrowse-highlight-id'] = generatedId;
+      } catch (e) {
+          // Use simple concatenation for the warning
+          console.warn('Could not set highlight attribute on node: ' + (node ? node.tagName : 'unknown') + ', Error: ' + e);
+      }
 
       // Check viewport status before visually highlighting
       nodeData.isInViewport = isInExpandedViewport(node, viewportExpansion);
