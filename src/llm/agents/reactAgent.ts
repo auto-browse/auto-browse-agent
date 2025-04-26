@@ -70,7 +70,7 @@ Your output must be a stringified JSON object with exactly these fields:
     "action_result": "<final result of actions performed using the tools>"
     }`;
 
-    console.log(customPrompt);
+    //console.log(customPrompt);
 
     return await createReactAgent({
         llm: llmWithTools,

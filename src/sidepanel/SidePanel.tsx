@@ -305,7 +305,8 @@ export const SidePanel: React.FC<SidePanelProps> = ({ onOpenOptions }) => {
 									{message.response?.data?.elements && (
 										<div className="mt-2 bg-gray-50 dark:bg-gray-900 rounded-md p-2 overflow-auto max-h-96">
 											{message.action ===
-											ActionType.GET_FORMATTED_INTERACTIVE_MAP ? (
+												ActionType.GET_FORMATTED_INTERACTIVE_MAP ||
+											message.action === ActionType.GET_CLICKABLE_ELEMENTS ? (
 												<div className="space-y-2">
 													{message.response.data.elements.map(
 														(element: any, index: number) => (

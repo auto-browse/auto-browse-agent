@@ -154,38 +154,13 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
             }
 
             case ActionType.GET_CLICKABLE_ELEMENTS: {
-                try
-                {
-                    // Call the updated service method
-                    const response = await browserService.getClickableElements({});
-
-                    // Check if the call was successful and data (with markdown) exists
-                    if (response.success && response.data && typeof response.data.markdown === 'string')
-                    {
-                        // The markdown string is already formatted, use it directly for the message
-                        // Pass the data object containing timestamp and markdown
-                        return {
-                            success: true,
-                            message: response.data.markdown, // Use the markdown string as the message
-                            data: response.data // Pass the data object containing timestamp and markdown
-                        };
-                    } else
-                    {
-                        // Handle the case where the service call failed
-                        return {
-                            success: false,
-                            message: response.message || "Failed to get clickable elements, no data returned.",
-                            error: response.error
-                        };
-                    }
-                } catch (error)
-                {
-                    return {
-                        success: false,
-                        message: error instanceof Error ? error.message : String(error),
-                        error: error instanceof Error ? error : new Error(String(error))
-                    };
-                }
+                const response = await browserService.getClickableElements({});
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
             }
 
             case ActionType.TAKE_SCREENSHOT: {

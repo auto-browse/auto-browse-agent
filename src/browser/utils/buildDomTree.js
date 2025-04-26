@@ -1,6 +1,6 @@
 export const buildDomTreeScript = `(() => {
 const args = {
-    doHighlightElements: true,
+    doHighlightElements: false,
     focusHighlightIndex: -1,
     viewportExpansion: -1,
     debugMode: false,

@@ -89,7 +89,7 @@ class BrowserStateService {
 
             if (opts.includeInteractiveMap)
             {
-                const interactiveMapResponse = await browserService.getFormattedInteractiveMap();
+                const interactiveMapResponse = await browserService.getClickableElements({});
                 if (!interactiveMapResponse.success)
                 {
                     throw new Error("Failed to get interactive map");
@@ -165,7 +165,7 @@ class BrowserStateService {
             {
                 message += "## Accessibility Tree\n\n```yaml\n" + state.accessibility + "\n```\n\n";
             }
-
+            console.log("Browser state retrieved successfully:", message);
             return {
                 success: true,
                 message: message,

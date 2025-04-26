@@ -19,10 +19,16 @@ const INTERACTIVE_ELEMENT_ATTRIBUTES: string[] = [
     'aria_name' // Note: This might be specific to the other script's output, verify if needed
 ];
 
-// Define the structure for the data part of the response (now holding markdown)
+// Define the structure for the data part of the response
 export interface ClickableElementsData {
     timestamp: string;
-    markdown: string; // Changed from elements array to markdown string
+    elements: {
+        index: number;
+        tagName: string;
+        attributesStr: string;
+        textContent: string;
+        formattedOutput: string;
+    }[];
 }
 
 export interface ClickableElementsParams {
@@ -50,18 +56,20 @@ export class ClickableElementsService {
             // Get connection using browserService
             const { page } = await browserService.getOrCreateConnection();
 
-            console.log("--- Executing clickable elements script ---");
+
             // Execute the script in the page context
             const result = await page.evaluate(buildDomTreeScript);
             const scriptResult = result as DomScriptResult; // Cast the raw result
 
-            console.log("--- Raw result from page.evaluate (casted) ---");
-            console.log("Result rootId:", scriptResult?.rootId);
-            console.log("Result map keys:", scriptResult?.map ? Object.keys(scriptResult.map).length : 'N/A');
-            console.log("---------------------------------------");
 
             const nodeDataMap = scriptResult?.map ?? {};
-            const formattedElements: { index: number; markdown: string; }[] = [];
+            const formattedElements: {
+                index: number;
+                tagName: string;
+                attributesStr: string;
+                textContent: string;
+                formattedOutput: string;
+            }[] = [];
 
             for (const nodeIdStr in nodeDataMap)
             {
@@ -83,27 +91,30 @@ export class ClickableElementsService {
                         .map((pair: { key: string; value: string | undefined; }) => `${pair.key}="${pair.value}"`) // Ensure type for pair, ensure quotes around value
                         .join(' ');
 
-                    // 3. Construct Markdown String
+                    // 3. Create formatted element
                     const tagNameLower = nodeData.tagName.toLowerCase();
-                    const markdownString = `${nodeData.highlightIndex}[:]<${tagNameLower}${attributesStr ? ' ' + attributesStr : ''}>${innerText}</${tagNameLower}>`;
+                    const element = {
+                        index: nodeData.highlightIndex,
+                        tagName: tagNameLower,
+                        attributesStr: attributesStr ? ' ' + attributesStr : '',
+                        textContent: innerText,
+                        formattedOutput: `${nodeData.highlightIndex}[:]<${tagNameLower}${attributesStr ? ' ' + attributesStr : ''}>${innerText}</${tagNameLower}>`
+                    };
 
-                    formattedElements.push({ index: nodeData.highlightIndex, markdown: markdownString });
+                    formattedElements.push(element);
                 }
             }
 
             // Sort elements by index
             formattedElements.sort((a, b) => a.index - b.index);
+            console.log("Formatted elements:", formattedElements);
 
-            // Join into a single markdown string
-            const finalMarkdownString = formattedElements.map(el => el.markdown).join('\n');
-
-            // Return the markdown structure
             return {
                 success: true,
-                message: `Generated markdown for ${formattedElements.length} clickable elements.`,
+                message: `Found ${formattedElements.length} clickable elements with formatted output`,
                 data: {
                     timestamp: new Date().toISOString(),
-                    markdown: finalMarkdownString // Return the final string
+                    elements: formattedElements
                 }
             };
 
