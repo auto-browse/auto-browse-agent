@@ -17,7 +17,9 @@ import { xpathService } from "./xpathService";
 import { urlService } from "./urlService";
 import { viewportService } from "./viewportService";
 import { browserStateService } from "./browserStateService";
-import { clickableElementsService, ClickableElementsParams, ClickableElementResult } from "./clickableElementsService"; // Import the singleton instance
+// Removed ClickableElementResult from import as it no longer exists
+import { clickableElementsService, ClickableElementsParams } from "./clickableElementsService"; // Import the singleton instance
+import { BrowserServiceResponse } from "../types"; // Ensure BrowserServiceResponse is imported
 
 /**
  * Service class for managing browser operations using Puppeteer
@@ -175,7 +177,8 @@ class BrowserService {
     }
 
     // Updated method for clickable elements - connection handling moved to the service
-    async getClickableElements(params: ClickableElementsParams): Promise<ClickableElementResult> {
+    // Updated return type to BrowserServiceResponse
+    async getClickableElements(params: ClickableElementsParams): Promise<BrowserServiceResponse> {
         // Directly call the service method, which now handles its own connection
         return await clickableElementsService.getClickableElements(params);
     }

@@ -156,20 +156,30 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
             case ActionType.GET_CLICKABLE_ELEMENTS: {
                 try
                 {
+                    // Call the updated service method
                     const response = await browserService.getClickableElements({});
-                    const formattedJson = JSON.stringify({
 
-                        historyElementMap: response.historyElementMap
-                    }, null, 2);
-                    // Return only the serializable parts in the data field as well
-                    return {
-                        success: true,
-                        message: formattedJson, // Keep the formatted JSON string for the message
-                        data: {
-                            scriptResult: response.scriptResult,
-                            historyElementMap: response.historyElementMap
-                        }
-                    };
+                    // Check if the call was successful and data exists
+                    if (response.success && response.data)
+                    {
+                        // Stringify the actual data (elements list + timestamp) for the message
+                        const formattedJson = JSON.stringify(response.data, null, 2);
+
+                        // Return the actual data in the data field
+                        return {
+                            success: true,
+                            message: formattedJson, // Use the stringified data as the message
+                            data: response.data // Pass the data object containing timestamp and elements
+                        };
+                    } else
+                    {
+                        // Handle the case where the service call failed
+                        return {
+                            success: false,
+                            message: response.message || "Failed to get clickable elements, no data returned.",
+                            error: response.error
+                        };
+                    }
                 } catch (error)
                 {
                     return {
