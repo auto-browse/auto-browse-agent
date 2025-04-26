@@ -159,17 +159,15 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                     // Call the updated service method
                     const response = await browserService.getClickableElements({});
 
-                    // Check if the call was successful and data exists
-                    if (response.success && response.data)
+                    // Check if the call was successful and data (with markdown) exists
+                    if (response.success && response.data && typeof response.data.markdown === 'string')
                     {
-                        // Stringify the actual data (elements list + timestamp) for the message
-                        const formattedJson = JSON.stringify(response.data, null, 2);
-
-                        // Return the actual data in the data field
+                        // The markdown string is already formatted, use it directly for the message
+                        // Pass the data object containing timestamp and markdown
                         return {
                             success: true,
-                            message: formattedJson, // Use the stringified data as the message
-                            data: response.data // Pass the data object containing timestamp and elements
+                            message: response.data.markdown, // Use the markdown string as the message
+                            data: response.data // Pass the data object containing timestamp and markdown
                         };
                     } else
                     {
