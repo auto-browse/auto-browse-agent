@@ -57,6 +57,13 @@ const debugButtons: DebugButton[] = [
 			"bg-violet-100 hover:bg-violet-200 text-violet-800 dark:bg-violet-900 dark:hover:bg-violet-800 dark:text-violet-200"
 	},
 	{
+		action: ActionType.GET_ENHANCED_ACCESSIBILITY_SNAPSHOT,
+		label: "Enhanced A11y",
+		icon: <Accessibility className="h-4 w-4 mr-2" />,
+		className:
+			"bg-teal-100 hover:bg-teal-200 text-teal-800 dark:bg-teal-900 dark:hover:bg-teal-800 dark:text-teal-200"
+	},
+	{
 		action: ActionType.ANALYZE_COOKIE_BANNERS,
 		label: "Cookie UI",
 		icon: <Cookie className="h-4 w-4 mr-2" />,

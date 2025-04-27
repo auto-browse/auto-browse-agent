@@ -107,7 +107,7 @@ export class ClickableElementsService {
 
             // Sort elements by index
             formattedElements.sort((a, b) => a.index - b.index);
-            console.log("Formatted elements:", formattedElements);
+
 
             return {
                 success: true,

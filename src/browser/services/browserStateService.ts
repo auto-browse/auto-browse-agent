@@ -138,7 +138,7 @@ class BrowserStateService {
                     message += 'empty page';
                 } else
                 {
-                    const viewportInfo = state.viewport;
+                    /*const viewportInfo = state.viewport;
                     if (viewportInfo && viewportInfo.pixelsAbove > 0)
                     {
                         message += `... ${viewportInfo.pixelsAbove} pixels above - scroll or extract content to see more ...\n`;
@@ -155,7 +155,7 @@ class BrowserStateService {
                     } else
                     {
                         message += '\n[End of page]';
-                    }
+                    }*/
                 }
 
                 message += "\n\n";
@@ -165,7 +165,7 @@ class BrowserStateService {
             {
                 message += "## Accessibility Tree\n\n```yaml\n" + state.accessibility + "\n```\n\n";
             }
-            console.log("Browser state retrieved successfully:", message);
+            //console.log("Browser state retrieved successfully:", message);
             return {
                 success: true,
                 message: message,

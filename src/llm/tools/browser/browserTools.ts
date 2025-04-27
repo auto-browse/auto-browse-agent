@@ -20,7 +20,7 @@ export type GotoParams = {
 };
 
 export type ClickParams = {
-    index: number;
+    ref: string;
 };
 
 export type FillParams = {
@@ -56,7 +56,7 @@ export function createBrowserTools() {
     });
 
     const clickSchema = z.object({
-        index: z.number().int().nonnegative().describe("autobrowse highlight index")
+        ref: z.string().regex(/^s\d+e\d+$/, "Ref must be an aria ref string (e.g., s1e5).").describe("The aria ref string (e.g., s1e5) of the element to click.")
     });
 
     const fillSchema = z.object({
@@ -97,24 +97,53 @@ export function createBrowserTools() {
 
     const clickTool = tool(
         async (input: ClickParams): Promise<string> => {
+            const { page } = await browserService.getOrCreateConnection();
+            const selector = input.ref; // Use input.ref now
+            let elementHandle = null; // To manage disposal in finally block
+
             try
             {
-                const { page } = await browserService.getOrCreateConnection();
-                const locator = `[autobrowse-highlight-id="autobrowse-highlight-${input.index}"]`;
-                await page.waitForSelector(locator);
-                await page.click(locator);
-                return `Successfully clicked element #${input.index}`;
+                // Logic exclusively for aria ref string
+                elementHandle = await page.evaluateHandle((ref) => {
+                    // Access the globally attached instance using the established pattern
+                    const injected = (window as any).__injectedScript;
+                    if (injected && typeof injected.getElementByAriaRef === 'function')
+                    {
+                        return injected.getElementByAriaRef(ref);
+                    }
+                    console.error('window.__injectedScript or getElementByAriaRef not found');
+                    return null;
+                }, selector);
+
+                const element = elementHandle.asElement();
+                if (element)
+                {
+                    // Perform the click using the handle
+                    await element.click();
+                    // No need to dispose here, handled in finally
+                    return `Successfully clicked element with ref "${selector}"`;
+                } else
+                {
+                    // getElementByAriaRef logs details in the browser console
+                    return `Error clicking element with ref "${selector}": Element not found, stale, or detached. Check browser console for details.`;
+                }
             } catch (error)
             {
-                return `Error clicking element #${input.index}: ${error instanceof Error ? error.message : String(error)}`;
+                const errorMsg = error instanceof Error ? error.message : String(error);
+                return `Error clicking element with ref "${selector}": ${errorMsg}`;
             } finally
             {
+                // Ensure the handle is disposed if it was created
+                if (elementHandle)
+                {
+                    await elementHandle.dispose();
+                }
                 await browserService.closeConnection();
             }
         },
         {
             name: "click",
-            description: "Click an element by its autobrowse-highlight-id index",
+            description: "Click an element identified by its aria ref string (e.g., s1e5).",
             schema: clickSchema,
         }
     );
@@ -330,7 +359,7 @@ export function createBrowserTools() {
                     includeUrl: input.includeUrl,
                     includeTitle: input.includeTitle,
                     includeViewport: input.includeViewport,
-                    includeInteractiveMap: input.includeInteractiveMap,
+                    //includeInteractiveMap: input.includeInteractiveMap,
                     includeAccessibility: input.includeAccessibility
                 };
 

@@ -71,7 +71,7 @@ export async function* streamMessage(message: string) {
         pastSteps: [],
         reactresult: ""
     }, {
-        recursionLimit: 100,
+        recursionLimit: 10,
         streamMode: "updates"
     });
 

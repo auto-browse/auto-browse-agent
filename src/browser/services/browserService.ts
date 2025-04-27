@@ -134,6 +134,10 @@ class BrowserService {
         return accessibilityService.getAccessibilitySnapshot();
     }
 
+    async getEnhancedAccessibilitySnapshot() {
+        return accessibilityService.enhancedAccessibilitySnapshot();
+    }
+
     async takeScreenshot() {
         return screenshotService.takeScreenshot();
     }

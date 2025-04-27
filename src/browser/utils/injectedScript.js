@@ -1310,7 +1310,7 @@ var InjectedScriptExports = (() => {
 
   // src/browser/snapshot/injectedScript.ts
   var InjectedScript = class {
-    constructor(window2, isUnderTest) {
+    constructor(window2) {
       __publicField(this, "utils", {
         builtins: builtins()
       });
@@ -1320,8 +1320,7 @@ var InjectedScriptExports = (() => {
       this.window = window2;
       this.document = window2.document;
       this.utils.builtins = builtins(window2);
-      if (isUnderTest)
-        this.window.__injectedScript = this;
+      this.window.__injectedScript = this;
     }
     ariaSnapshot(node, options) {
       var _a;
@@ -1339,9 +1338,50 @@ var InjectedScriptExports = (() => {
       delete error.stack;
       return error;
     }
+    /**
+     * Finds an element based on its aria ref identifier (s<generation>e<elementId>).
+     * This method should be called within the browser context (e.g., using page.evaluate).
+     * @param selector The aria ref selector string.
+     * @returns The matching Element or null if not found or stale.
+     */
+    getElementByAriaRef(selector) {
+      var _a;
+      const match = selector.match(/^s(\d+)e(\d+)$/);
+      if (!match) {
+        console.error("Invalid aria-ref selector format. Expected s<number>e<number>, got:", selector);
+        return null;
+      }
+      const [, generationStr, elementIdStr] = match;
+      const generation = parseInt(generationStr, 10);
+      const elementId = parseInt(elementIdStr, 10);
+      if (!this._lastAriaSnapshot) {
+        console.error("No aria snapshot available to resolve ref:", selector);
+        return null;
+      }
+      if (this._lastAriaSnapshot.generation !== generation) {
+        console.warn(`Stale aria-ref: Snapshot generation is ${this._lastAriaSnapshot.generation}, but selector used generation ${generation}. Ref: ${selector}`);
+        return null;
+      }
+      const element = (_a = this._lastAriaSnapshot.elements) == null ? void 0 : _a.get(elementId);
+      if (!element) {
+        console.warn(`Aria-ref element not found in snapshot: ${selector}`);
+        return null;
+      }
+      if (!element.isConnected) {
+        console.warn(`Aria-ref element is no longer connected to the DOM: ${selector}`);
+        return null;
+      }
+      return element;
+    }
   };
+  function getOrCreateInjectedScript() {
+    if (!window.__injectedScript) {
+      new InjectedScript(window);
+    }
+    return window.__injectedScript;
+  }
   function createAriaSnapshot(element, options) {
-    const injectedScript = new InjectedScript(window, false);
+    const injectedScript = getOrCreateInjectedScript();
     return injectedScript.ariaSnapshot(element, options);
   }
   if (typeof window !== "undefined") {

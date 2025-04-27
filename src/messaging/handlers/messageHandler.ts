@@ -73,6 +73,16 @@ export async function handleMessage(request: MessageRequest): Promise<MessageRes
                 };
             }
 
+            case ActionType.GET_ENHANCED_ACCESSIBILITY_SNAPSHOT: {
+                const response = await browserService.getEnhancedAccessibilitySnapshot();
+                return {
+                    success: response.success,
+                    message: response.message,
+                    error: response.error,
+                    data: response.data
+                };
+            }
+
             case ActionType.ANALYZE_COOKIE_BANNERS: {
                 const response = await browserService.analyzeCookieBanners();
                 return {
