@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Auto-Browse",
-    "description": "A browser extension for automated web browsing using LLMs",
-    "version": "1.0.0",
+    "description": "Browser extension for automated web browsing using LLMs",
+    "version": "0.0.1",
     "permissions": [
         "activeTab",
         "scripting",
@@ -24,7 +24,10 @@
         "service_worker": "background.js",
         "type": "module"
     },
-    "content_security_policy": {
-        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    "icons": {
+        "16": "logo16x16.png",
+        "32": "logo32x32.png",
+        "48": "logo48x48.png",
+        "128": "logo128x128.png"
     }
 }
