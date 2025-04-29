@@ -1,5 +1,5 @@
 import { BrowserServiceResponse } from "../types";
-import { browserService } from "./browserService";
+import { baseService } from "./baseService";
 import { domTraversalScript } from "../utils/domTraversal";
 
 const INTERACTIVE_ELEMENT_ATTRIBUTES = [
@@ -25,7 +25,7 @@ class InteractiveMapService {
     async getInteractiveMap(): Promise<BrowserServiceResponse> {
         try
         {
-            const { page } = await browserService.getOrCreateConnection();
+            const { page } = await baseService.getOrCreateConnection();
             const tree = await page.evaluate(domTraversalScript);
 
             // Filter tree to find interactive elements with positions
@@ -113,7 +113,7 @@ class InteractiveMapService {
     async getFormattedInteractiveMap(): Promise<BrowserServiceResponse> {
         try
         {
-            const { page } = await browserService.getOrCreateConnection();
+            const { page } = await baseService.getOrCreateConnection();
             const tree = await page.evaluate(domTraversalScript);
 
             const elements: any[] = [];

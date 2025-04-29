@@ -1,4 +1,4 @@
-import { browserService } from "./browserService";
+import { baseService } from "./baseService";
 import { BrowserServiceResponse } from "../types";
 
 /**
@@ -12,7 +12,7 @@ class UrlService {
     async getCurrentUrl(): Promise<BrowserServiceResponse> {
         try
         {
-            const connection = await browserService.getOrCreateConnection();
+            const connection = await baseService.getOrCreateConnection();
             const url = await connection.page.url();
 
             return {

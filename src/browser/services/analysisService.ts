@@ -1,11 +1,11 @@
 import { BrowserServiceResponse } from "../types";
-import { browserService } from "./browserService";
+import { baseService } from "./baseService";
 
 class AnalysisService {
     async analyzePage(): Promise<BrowserServiceResponse> {
         try
         {
-            const { page } = await browserService.getOrCreateConnection();
+            const { page } = await baseService.getOrCreateConnection();
             const analysis = await page.evaluate(() => {
                 const stats = {
                     links: document.getElementsByTagName('a').length,

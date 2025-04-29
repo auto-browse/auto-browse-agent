@@ -1,5 +1,5 @@
 import { BrowserServiceResponse } from "../types";
-import { browserService } from "./browserService";
+import { baseService } from "./baseService";
 import { injectedScriptSource } from "../utils/injectedScriptSource";
 // Use the specified import path for Puppeteer types
 import type { Page, Frame, ElementHandle, JSHandle } from "puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js";
@@ -12,7 +12,7 @@ class AccessibilityService {
     async getAccessibilitySnapshot(): Promise<BrowserServiceResponse> {
         try
         {
-            const { page } = await browserService.getOrCreateConnection();
+            const { page } = await baseService.getOrCreateConnection();
 
             // First inject our script into the page context
             await page.evaluate(`${injectedScriptSource}`);
@@ -63,7 +63,7 @@ class AccessibilityService {
         let page: Page | null = null;
         try
         {
-            page = (await browserService.getOrCreateConnection()).page;
+            page = (await baseService.getOrCreateConnection()).page;
 
             // Ensure script is injected in the main page first
             await page.evaluate(`${injectedScriptSource}`);

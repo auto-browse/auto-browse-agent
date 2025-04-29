@@ -1,5 +1,5 @@
 import { buildDomTreeScript } from '../utils/buildDomTree'; // Import the existing DOM tree script
-import { browserService } from './browserService';
+import { baseService } from './baseService';
 import { DomScriptResult, DomNodeData } from './types'; // Import DomNodeData
 import { BrowserServiceResponse } from '../types'; // Import BrowserServiceResponse
 
@@ -54,7 +54,7 @@ export class ClickableElementsService {
         try
         {
             // Get connection using browserService
-            const { page } = await browserService.getOrCreateConnection();
+            const { page } = await baseService.getOrCreateConnection();
 
 
             // Execute the script in the page context

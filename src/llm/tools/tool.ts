@@ -1,0 +1,91 @@
+/**
+ * Copyright (c) Microsoft Corporation.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { type ImageContent, type TextContent, Context } from '../context';
+import type { z } from 'zod';
+import { tool } from '@langchain/core/tools';
+import type {
+    Dialog,
+    FileChooser
+} from "puppeteer-core/lib/esm/puppeteer/puppeteer-core-browser.js";
+export type ToolCapability = 'core' | 'tabs' | 'pdf' | 'history' | 'wait' | 'files' | 'install';
+
+export type ToolSchema<Input extends InputType> = {
+    name: string;
+    description: string;
+    inputSchema: Input;
+};
+
+type InputType = z.Schema;
+
+export type FileUploadModalState = {
+    type: 'fileChooser';
+    description: string;
+    fileChooser: FileChooser;
+};
+
+export type DialogModalState = {
+    type: 'dialog';
+    description: string;
+    dialog: Dialog;
+};
+
+export type ModalState = FileUploadModalState | DialogModalState;
+
+export type ToolActionResult = { content?: (ImageContent | TextContent)[]; } | undefined | void;
+
+export type ToolResult = {
+    code: string[];
+    action?: () => Promise<ToolActionResult>;
+    captureSnapshot: boolean;
+    waitForNetwork: boolean;
+    resultOverride?: ToolActionResult;
+};
+
+export type Tool<Input extends InputType = InputType> = {
+    capability: ToolCapability;
+    schema: ToolSchema<Input>;
+    clearsModalState?: ModalState['type'];
+    handle: (context: Context, params: z.output<Input>) => Promise<ToolResult>;
+};
+
+export type ToolFactory = (snapshot: boolean) => Tool<any>;
+
+export function defineTool<Input extends InputType>(tool: Tool<Input>): Tool<Input> {
+    return tool;
+}
+
+/**
+ * Creates a LangChain-compatible tool from our existing tool definition
+ * This allows our tools to be used in LangChain implementations while
+ * maintaining their original return type and functionality
+ */
+export function createLangChainTool(baseTool: Tool<any>) {
+    const toolInstance = tool(
+        async (params) => {
+            const context = await Context.getInstance();
+            const parsedParams = baseTool.schema.inputSchema.parse(params);
+            const result = await context.run(baseTool, parsedParams);
+            return result;
+        },
+        {
+            name: baseTool.schema.name,
+            description: baseTool.schema.description,
+            schema: baseTool.schema.inputSchema
+        }
+    );
+    return toolInstance;
+}
