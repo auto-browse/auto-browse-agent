@@ -4,8 +4,8 @@ import { Tool } from "@langchain/core/tools";
 import { createLLM } from "../services/llmService";
 //import { createBrowserTools } from "../tools/browser/browserTools";
 import { BrowserGraphState } from "./types/state";
-import { tool } from "@langchain/core/tools";
-import { z } from "zod";
+//import { tool } from "@langchain/core/tools";
+//import { z } from "zod";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { START, END, StateGraph } from "@langchain/langgraph/web"; // Use web for streamLog
 import { createLangChainTool } from '../tools/tool';
@@ -24,22 +24,12 @@ const browserTools = [...allTools] as Tool[];
 //const browserTools = snapshot.map(createLangChainTool) as unknown as Tool[];
 
 
-// Define Tools (Synchronous part)
-const searchTool = tool(async ({ query: _query }: { query: string; }) => {
-    // Placeholder
-    return "Cold, with a low of 3℃";
-}, {
-    name: "search",
-    description: "Use to surf the web, fetch current information, check the weather, and retrieve other information.",
-    schema: z.object({
-        query: z.string().describe("The query to use in your search."),
-    }),
-});
+
 
 //const llmWithTools = model.bindTools(browserTools, { parallel_tool_calls: false });
 
 //const browserTools = createBrowserTools();
-const tools = [searchTool, ...browserTools];
+const tools = [...browserTools];
 const toolNode = new ToolNode(tools);
 
 // --- Async Graph Initialization ---
