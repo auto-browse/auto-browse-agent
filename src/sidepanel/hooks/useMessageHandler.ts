@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { handleMessage } from "@/messaging/handlers/messageHandler";
 import { ActionType, MessageRequest, MessageResponse } from "@/messaging/types";
-import { streamMessage } from "@/llm/graphs/browserGraph";
+import { streamMessage } from "@/llm/graphs/browserReactGraph";
 import {
     AIMessage,
     BaseMessage,

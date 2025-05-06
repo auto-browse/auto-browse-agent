@@ -2,6 +2,7 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { Tool } from "@langchain/core/tools";
 import snapshot from '../tools/snapshot';
 import navigateTools from '../tools/navigate';
+import browserState from '../tools/browserState'; // Import the new tool
 
 import { createLangChainTool } from '../tools/tool';
 import { createLLM } from "../services/llmService";
@@ -10,6 +11,7 @@ import { createLLM } from "../services/llmService";
 const allTools = [
     ...navigateTools(true),
     ...snapshot,
+    ...browserState, // Add the new tool to the list
 ].map(customTool => createLangChainTool(customTool));
 const browserTools = [...allTools] as Tool[];
 //const browserTools = snapshot.map(createLangChainTool) as unknown as Tool[];
@@ -36,10 +38,10 @@ export async function createAgent() {
 
 IMPORTANT RULES:
 
-1. SNAPSHOT FIRST POLICY:
-   - ALWAYS begin by calling snapshot to analyze the current page before performing ANY action
-   - Use the snapshot information to inform your next action
-   - Do not attempt interactions without first understanding the page context
+1. BROWSER STATE FIRST POLICY:
+   - ALWAYS begin by calling 'browser_state' to analyze the current page (URL, title, snapshot) before performing ANY action.
+   - Use the state information (URL, title, snapshot) to inform your next action.
+   - Do not attempt interactions without first understanding the page context via 'browser_state'.
 
 2. SEQUENTIAL WORKFLOW:
    - Run tools one at a time in sequence
@@ -60,8 +62,8 @@ IMPORTANT RULES:
      * URL and title to confirm the correct page
      * Interactive elements available for clicking, typing, etc.
      * Viewport metrics to determine if scrolling is needed
-     * Accessibility tree to understand page structure. Note, do not try to fetch this until abosolutely necessary. Use the interactive map instead.
-   - Use this information to make informed decisions about which actions to take
+     * Accessibility tree (snapshot) to understand page structure and identify elements.
+   - Use this information to make informed decisions about which actions to take.
 
 5. ELEMENT SELECTION:
    - When selecting elements to interact with, prioritize using the interactive element selectors from the browser state

@@ -1,10 +1,8 @@
-import { START, StateGraph } from "@langchain/langgraph/web";
+import { START, END, StateGraph } from "@langchain/langgraph/web";
 import { browserNode } from "./nodes/browserNode";
-//import { plannerNode } from "./nodes/plannerNode";
-//import { verifierNode } from "./nodes/verifierNode";
+import { plannerNode } from "./nodes/plannerNode";
+import { verifierNode } from "./nodes/verifierNode";
 import { BrowserGraphState } from "./types/state";
-import { HumanMessage } from "@langchain/core/messages";
-
 
 // Create route function to control flow based on planString
 /* const _routeFromPlanner = (state: typeof BrowserGraphState.State) => {
@@ -15,33 +13,70 @@ import { HumanMessage } from "@langchain/core/messages";
     return "browser";
 }; */
 
+const shouldContinue = (state: typeof BrowserGraphState.State) => {
+    // Check if planString is a string before calling startsWith
+    if (typeof state.planString === 'string' && state.planString.startsWith("Task completed:"))
+    {
+        return "end";
+    }
 
-const workflow = new StateGraph(BrowserGraphState)
-    .addNode("browser", browserNode)
-    .addEdge(START, "browser");
+    // If planString is an object with a description property
+    const planObj = state.planString as any;
+    if (planObj &&
+        typeof planObj === 'object' &&
+        'description' in planObj &&
+        typeof planObj.description === 'string' &&
+        planObj.description.startsWith("Task completed:"))
+    {
+        return "end";
+    }
 
+    return "browser";
+};
 
+const createBrowserGraph = () => {
+    const graph = new StateGraph(BrowserGraphState);
+
+    graph.addNode("planner", plannerNode)
+        .addNode("browser", browserNode)
+        .addNode("verifier", verifierNode)
+        .addEdge(START, "planner")
+        .addConditionalEdges("planner", shouldContinue, {
+            browser: "browser",
+            end: END
+        })
+        .addEdge("browser", "verifier")
+        .addEdge("verifier", "planner");
+
+    return graph.compile({ name: "browser_graph" });
+};
+
+export async function processMessage(message: string) {
+    const compiledGraph = createBrowserGraph();
+    return compiledGraph.invoke({
+        task: message,
+        messages: [],
+        planString: "",
+        pastSteps: [],
+        reactresult: ""
+    }, { recursionLimit: 100 });
+}
 
 export async function* streamMessage(message: string) {
-    const graph = workflow.compile();
-
-    // Transform the input message into a HumanMessage
-    const userMessage = new HumanMessage(message);
-
-    const stream = await graph.stream({
+    const compiledGraph = createBrowserGraph();
+    const stream = await compiledGraph.stream({
         task: message,
-        messages: [userMessage], // Initialize with the user's message
-        planString: message,
+        messages: [],
+        planString: "",
         pastSteps: [],
         reactresult: ""
     }, {
-        recursionLimit: 10,
+        recursionLimit: 100,
         streamMode: "updates"
     });
 
     for await (const chunk of stream)
     {
-        console.log("Chunk:", chunk);
         yield chunk;
     }
 }
