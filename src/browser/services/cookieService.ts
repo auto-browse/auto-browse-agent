@@ -1,5 +1,5 @@
 import { BrowserServiceResponse } from "../types";
-import { browserService } from "./browserService";
+import { baseService } from "./baseService";
 import { domTraversalScript } from "../utils/domTraversal";
 
 class CookieService {
@@ -10,7 +10,7 @@ class CookieService {
     async analyzeCookieBanners(): Promise<BrowserServiceResponse> {
         try
         {
-            const { page } = await browserService.getOrCreateConnection();
+            const { page } = await baseService.getOrCreateConnection();
             const tree = await page.evaluate(domTraversalScript);
 
             // Filter tree to find cookie/consent related elements

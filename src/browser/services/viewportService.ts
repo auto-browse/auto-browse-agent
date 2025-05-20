@@ -1,4 +1,4 @@
-import { browserService } from "./browserService";
+import { baseService } from "./baseService";
 import { BrowserServiceResponse } from "../types";
 
 interface ViewportState {
@@ -19,7 +19,7 @@ class ViewportService {
     async getViewportState(): Promise<BrowserServiceResponse> {
         try
         {
-            const connection = await browserService.getOrCreateConnection();
+            const connection = await baseService.getOrCreateConnection();
             const metrics = await connection.page.evaluate(() => {
                 const docHeight = Math.max(
                     document.body.scrollHeight,

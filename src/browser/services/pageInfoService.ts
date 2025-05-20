@@ -1,5 +1,5 @@
 import { BrowserServiceResponse } from "../types";
-import { browserService } from "./browserService";
+import { baseService } from "./baseService";
 
 class PageInfoService {
     /**
@@ -9,7 +9,7 @@ class PageInfoService {
     async getPageTitle(): Promise<BrowserServiceResponse> {
         try
         {
-            const { page } = await browserService.getOrCreateConnection();
+            const { page } = await baseService.getOrCreateConnection();
             const title = await page.title();
 
             return {
@@ -33,7 +33,7 @@ class PageInfoService {
     async countElements(): Promise<BrowserServiceResponse> {
         try
         {
-            const { page } = await browserService.getOrCreateConnection();
+            const { page } = await baseService.getOrCreateConnection();
             const count = await page.evaluate(() => document.getElementsByTagName('*').length);
 
             return {
@@ -57,7 +57,7 @@ class PageInfoService {
     async getMetadata(): Promise<BrowserServiceResponse> {
         try
         {
-            const { page } = await browserService.getOrCreateConnection();
+            const { page } = await baseService.getOrCreateConnection();
             const metadata = await page.evaluate(() => {
                 const metaTags = document.getElementsByTagName('meta');
                 const metadata: Record<string, string> = {};

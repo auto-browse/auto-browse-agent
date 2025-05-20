@@ -1,5 +1,5 @@
 import { BrowserServiceResponse } from "../types";
-import { browserService } from "./browserService";
+import { baseService } from "./baseService";
 import { domTraversalScript } from "../utils/domTraversal";
 
 class XpathService {
@@ -10,7 +10,7 @@ class XpathService {
     async getElementXpaths(): Promise<BrowserServiceResponse> {
         try
         {
-            const { page } = await browserService.getOrCreateConnection();
+            const { page } = await baseService.getOrCreateConnection();
             const tree = await page.evaluate(domTraversalScript);
 
             // Extract all elements with their XPaths

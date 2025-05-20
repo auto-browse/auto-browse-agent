@@ -1,5 +1,5 @@
 import { BrowserServiceResponse } from "../types";
-import { browserService } from "./browserService";
+import { baseService } from "./baseService";
 
 class ScreenshotService {
     /**
@@ -9,7 +9,7 @@ class ScreenshotService {
     async takeScreenshot(): Promise<BrowserServiceResponse> {
         try
         {
-            const { page } = await browserService.getOrCreateConnection();
+            const { page } = await baseService.getOrCreateConnection();
             const screenshot = await page.screenshot({
                 encoding: "base64",
                 fullPage: true,

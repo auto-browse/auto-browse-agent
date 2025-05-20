@@ -1,5 +1,5 @@
 import { BrowserServiceResponse } from "../types";
-import { browserService } from "./browserService";
+import { baseService } from "./baseService";
 
 /**
  * Service for handling page highlighting operations
@@ -12,7 +12,7 @@ class HighlightService {
     async highlightLinks(): Promise<BrowserServiceResponse> {
         try
         {
-            const { browser, page } = await browserService.connectToActivePage();
+            const { browser, page } = await baseService.connectToActivePage();
 
             const result = await page.evaluate(() => {
                 const links = document.querySelectorAll("a");

@@ -6,9 +6,10 @@
     "scripts": {
         "clean": "rm -rf dist",
         "typecheck": "tsc --noEmit",
+        "build:injected": "node scripts/build-injected-script.js",
         "build:vite": "npm run clean && vite build",
-        "build": "npm run typecheck && npm run build:vite && node scripts/copy-html.js",
-        "dev": "vite build --watch"
+        "build": "npm run typecheck && npm run build:injected && npm run build:vite && node scripts/copy-html.js",
+        "dev": "npm run build:injected && vite build --watch"
     },
     "keywords": [],
     "author": "",
@@ -31,6 +32,7 @@
         "autoprefixer": "^10.4.20",
         "babel-loader": "^9.2.1",
         "copy-webpack-plugin": "^12.0.2",
+        "esbuild": "^0.25.2",
         "html-webpack-plugin": "^5.6.3",
         "postcss": "^8.4.31",
         "postcss-import": "^16.1.0",
@@ -43,9 +45,12 @@
         "webpack-cli": "^6.0.1"
     },
     "dependencies": {
+        "@langchain/anthropic": "^0.3.18",
         "@langchain/core": "^0.3.42",
+        "@langchain/google-genai": "^0.2.4",
         "@langchain/langgraph": "^0.2.52",
         "@langchain/langgraph-supervisor": "^0.0.7",
+        "@langchain/ollama": "^0.2.0",
         "@langchain/openai": "^0.4.4",
         "@radix-ui/react-scroll-area": "^1.2.3",
         "@radix-ui/react-separator": "^1.1.2",

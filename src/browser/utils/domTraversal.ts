@@ -326,9 +326,9 @@ export const domTraversalScript = `(() => {
                 if (!isShadowHost && !isVisible && !this.isInteractive(node)) {
                     return null;
                 }
-                if (!isShadowHost && rect.bottom < viewport.top || rect.top > viewport.bottom) {
-                    return null;
-                }
+                //if (!isShadowHost && rect.bottom < viewport.top || rect.top > viewport.bottom) {
+                //    return null;
+                //}
 
                 const nodeData = {
                     tagName: node.nodeName.toLowerCase(),
